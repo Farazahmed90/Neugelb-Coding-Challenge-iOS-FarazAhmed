@@ -56,7 +56,12 @@ enum ErrorMessage {
                 localized: "The movie database is currently unavailable. Try again in a moment.",
                 bundle: .module
             )
-        case .notFound, .unknown, nil:
+        case .notFound:
+            return String(
+                localized: "This movie could not be found.",
+                bundle: .module
+            )
+        case .unknown, nil:
             return generic
         }
     }

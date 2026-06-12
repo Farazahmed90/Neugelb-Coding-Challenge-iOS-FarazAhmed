@@ -18,14 +18,36 @@ func makePage(ids: [Int], pageNumber: Int, totalPages: Int) -> Page<Movie> {
     Page(items: ids.map { makeMovie(id: $0) }, pageNumber: pageNumber, totalPages: totalPages)
 }
 
+func makeDetails(id: Int) -> MovieDetails {
+    MovieDetails(
+        id: id,
+        title: "Movie \(id)",
+        overview: "Overview \(id)",
+        tagline: "Tagline",
+        posterPath: "/poster\(id).jpg",
+        backdropPath: "/backdrop\(id).jpg",
+        releaseDate: nil,
+        runtimeMinutes: 120,
+        genres: [Genre(id: 1, name: "Drama")],
+        voteAverage: 7.5,
+        voteCount: 1_000
+    )
+}
+
 /// Scriptable repository: enqueue one result per expected call.
 final class MovieRepositoryMock: MovieRepository, @unchecked Sendable {
     private let lock = NSLock()
     private var latestResults: [Result<Page<Movie>, any Error>]
+    private var detailsResults: [Result<MovieDetails, any Error>]
     private(set) var requestedPages: [Int] = []
+    private(set) var requestedDetailIDs: [Int] = []
 
-    init(latestResults: [Result<Page<Movie>, any Error>] = []) {
+    init(
+        latestResults: [Result<Page<Movie>, any Error>] = [],
+        detailsResults: [Result<MovieDetails, any Error>] = []
+    ) {
         self.latestResults = latestResults
+        self.detailsResults = detailsResults
     }
 
     func latestMovies(page: Int) async throws -> Page<Movie> {
@@ -37,7 +59,11 @@ final class MovieRepositoryMock: MovieRepository, @unchecked Sendable {
     }
 
     func movieDetails(id: Movie.ID) async throws -> MovieDetails {
-        throw MovieRepositoryError.notFound
+        try lock.withLock {
+            requestedDetailIDs.append(id)
+            precondition(!detailsResults.isEmpty, "MovieRepositoryMock ran out of stubs")
+            return try detailsResults.removeFirst().get()
+        }
     }
 
     func searchMovies(matching query: String, page: Int) async throws -> Page<Movie> {
