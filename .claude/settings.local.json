@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xcodebuild -version)",
+      "Bash(DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild *)",
+      "Bash(grep -i -E \"gitignore|md$\")",
+      "Bash(git -C /Users/farazahmed/Desktop/Projects/Neugelb/NeugelbCodingChallenge-iOS-FarazAhmed ls-files)",
+      "Bash(git rm *)",
+      "Bash(git remote *)",
+      "Bash(gh auth *)",
+      "Bash(ssh-keygen -t ed25519 -C \"khatrifaraz40@gmail.com\" -f ~/.ssh/id_ed25519 -N \"\" -q)",
+      "Read(//Users/farazahmed/.ssh/**)"
+    ]
+  }
+}
