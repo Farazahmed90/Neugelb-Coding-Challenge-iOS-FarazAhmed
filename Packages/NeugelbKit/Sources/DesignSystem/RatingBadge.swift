@@ -15,7 +15,7 @@ public struct RatingBadge: View {
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .background(.black.opacity(0.65), in: .capsule)
-            .accessibilityLabel(Text("Rated \(formatted) out of 10"))
+            .accessibilityLabel(Text("Rated \(formatted) out of 10", bundle: .module))
     }
 
     private var formatted: String {

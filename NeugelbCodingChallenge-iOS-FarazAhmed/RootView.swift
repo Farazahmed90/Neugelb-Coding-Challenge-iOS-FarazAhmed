@@ -1,3 +1,4 @@
+import MoviesData
 import MoviesDomain
 import MoviesFeature
 import SwiftUI
@@ -24,6 +25,8 @@ struct RootView: View {
         )
     }
 
+    @State private var needsToken = false
+
     var body: some View {
         NavigationStack {
             MovieListScreen(viewModel: movieListViewModel, searchViewModel: searchViewModel)
@@ -38,5 +41,15 @@ struct RootView: View {
                 }
         }
         .environment(\.imageLoader, dependencies.imageLoader)
+        .task {
+            needsToken = await !dependencies.tokenProvider.hasToken()
+        }
+        .sheet(isPresented: $needsToken) {
+            TokenEntryView { token in
+                try? await dependencies.tokenProvider.update(token: token)
+                needsToken = false
+                await movieListViewModel.paginator.loadFirst()
+            }
+        }
     }
 }

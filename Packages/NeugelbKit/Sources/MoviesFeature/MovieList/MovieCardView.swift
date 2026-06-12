@@ -33,7 +33,8 @@ struct MovieCardView: View {
         }
         .contentShape(.rect)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(accessibilitySummary)
+        .accessibilityLabel(Text(movie.title))
+        .accessibilityValue(accessibilityDetails)
         .accessibilityIdentifier("movie_list.card.\(movie.id)")
     }
 
@@ -41,16 +42,16 @@ struct MovieCardView: View {
         movie.releaseDate.map { $0.formatted(.dateTime.year()) }
     }
 
-    private var accessibilitySummary: Text {
-        var summary = movie.title
+    private var accessibilityDetails: Text {
+        var parts: [String] = []
         if let releaseYear {
-            summary += ", \(releaseYear)"
+            parts.append(releaseYear)
         }
         if movie.voteCount > 0 {
             let rating = movie.voteAverage.formatted(.number.precision(.fractionLength(1)))
-            summary += ", rated \(rating) out of 10"
+            parts.append(String(localized: "Rated \(rating) out of 10", bundle: .module))
         }
-        return Text(summary)
+        return Text(parts.joined(separator: ", "))
     }
 
     /// Redacted shimmer stand-in shown while the first page loads.

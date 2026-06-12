@@ -1,0 +1,46 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Paste your TMDB API Read Access Token (v4) to load movies. It is stored securely in the Keychain. You can create a free token at themoviedb.org/settings/api." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Füge deinen TMDB API Read Access Token (v4) ein, um Filme zu laden. Er wird sicher im Schlüsselbund gespeichert. Einen kostenlosen Token erhältst du unter themoviedb.org/settings/api."
+          }
+        }
+      }
+    },
+    "Save" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sichern"
+          }
+        }
+      }
+    },
+    "TMDB Access Token" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TMDB-Zugriffstoken"
+          }
+        }
+      }
+    },
+    "Welcome" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Willkommen"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
