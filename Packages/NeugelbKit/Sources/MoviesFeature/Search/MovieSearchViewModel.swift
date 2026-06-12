@@ -24,6 +24,25 @@ public final class MovieSearchViewModel {
 
     public var results: [Movie] { paginator?.items ?? [] }
 
+    /// Distinct top result titles offered as search-field completions.
+    public var suggestions: [String] {
+        guard phase == .loaded, suggestionsVisible else { return [] }
+        var seen = Set<String>()
+        let titles = results.prefix(20).map(\.title)
+            .filter { seen.insert($0.lowercased()).inserted }
+        return Array(titles.prefix(8))
+    }
+
+    /// Suggestions hide after one is chosen and reappear on typing,
+    /// otherwise the suggestion overlay would keep covering the results.
+    private var suggestionsVisible = true
+    private var isApplyingSuggestion = false
+
+    public func acceptSuggestion(_ title: String) {
+        isApplyingSuggestion = true
+        query = title
+    }
+
     private let repository: any MovieRepository
     private let imageURLResolver: any ImageURLResolving
     private let debounce: Duration
@@ -54,6 +73,8 @@ public final class MovieSearchViewModel {
     }
 
     private func queryChanged() {
+        suggestionsVisible = !isApplyingSuggestion
+        isApplyingSuggestion = false
         debounceTask?.cancel()
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
 
