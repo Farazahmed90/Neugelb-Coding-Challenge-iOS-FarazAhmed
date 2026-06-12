@@ -13,6 +13,7 @@ struct MovieGridView: View {
     static let columns = [GridItem(.adaptive(minimum: 150, maximum: 220), spacing: 16)]
 
     @State private var scrollPosition = ScrollPosition()
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         ScrollView {
@@ -23,11 +24,14 @@ struct MovieGridView: View {
                     }
                     .buttonStyle(.plain)
                     // Cards materialize blur-to-sharp in a staggered wave,
-                    // each one a beat after its neighbor.
-                    .transition(.blurReplace)
+                    // each one a beat after its neighbor. Reduce Motion
+                    // collapses the wave into a plain fade.
+                    .transition(reduceMotion ? .opacity : AnyTransition(.blurReplace))
                     .animation(
-                        .bouncy(duration: 0.45, extraBounce: 0.04)
-                            .delay(cascadeDelay(for: index)),
+                        reduceMotion
+                            ? .easeInOut(duration: 0.2)
+                            : .bouncy(duration: 0.45, extraBounce: 0.04)
+                                .delay(cascadeDelay(for: index)),
                         value: paginator.items
                     )
                     .task { await paginator.loadMoreIfNeeded(after: movie) }
@@ -47,7 +51,7 @@ struct MovieGridView: View {
         .onChange(of: paginator.items.first?.id) { old, new in
             // A new leading result means a new result set: surface it.
             guard old != nil, old != new else { return }
-            withAnimation(.smooth(duration: 0.4)) {
+            withAnimation(reduceMotion ? nil : .smooth(duration: 0.4)) {
                 scrollPosition.scrollTo(edge: .top)
             }
         }

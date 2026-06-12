@@ -24,7 +24,10 @@ struct AppDependencies {
             configuration: configuration
         )
         return AppDependencies(
-            movieRepository: TMDBMovieRepository(client: apiClient),
+            movieRepository: OfflineFallbackMovieRepository(
+                remote: TMDBMovieRepository(client: apiClient),
+                cache: MovieListDiskCache()
+            ),
             imageURLResolver: TMDBImageURLResolver(configuration: configuration),
             tokenProvider: tokenProvider,
             imageLoader: ImageLoader()
