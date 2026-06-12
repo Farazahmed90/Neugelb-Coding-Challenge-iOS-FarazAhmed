@@ -17,6 +17,10 @@ public struct MovieDetailScreen: View {
                 header
                 content
                     .padding(.horizontal)
+                    // Cap the reading width so iPad/Mac/Vision don't get
+                    // edge-to-edge text lines; the column stays centered.
+                    .frame(maxWidth: 720, alignment: .leading)
+                    .frame(maxWidth: .infinity)
             }
             .padding(.bottom, 32)
         }
@@ -30,7 +34,8 @@ public struct MovieDetailScreen: View {
 
     private var header: some View {
         RemoteImage(url: viewModel.backdropURL)
-            .aspectRatio(16 / 10, contentMode: .fit)
+            .frame(height: 320)
+            .frame(maxWidth: .infinity)
             .overlay {
                 LinearGradient(
                     colors: [.clear, .clear, .black.opacity(0.75)],
@@ -51,6 +56,7 @@ public struct MovieDetailScreen: View {
                     }
                 }
                 .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
             .clipped()
     }
@@ -145,7 +151,9 @@ public struct MovieDetailScreen: View {
                 Text("Overview", bundle: .module)
                     .font(.headline)
                     .accessibilityAddTraits(.isHeader)
-                Text(overview.isEmpty ? String(repeating: " ", count: 280) : overview)
+                // Redaction needs real wrapping words: whitespace runs don't
+                // wrap and would push the layout past the screen edge.
+                Text(overview.isEmpty ? Self.overviewPlaceholder : overview)
                     .font(.body)
                     .foregroundStyle(.secondary)
                     .accessibilityIdentifier("movie_detail.overview")
@@ -156,6 +164,11 @@ public struct MovieDetailScreen: View {
                 .foregroundStyle(.secondary)
         }
     }
+
+    private static let overviewPlaceholder = String(
+        repeating: "Loading the movie overview text. ",
+        count: 8
+    )
 
     private var tagline: String? {
         guard case .loaded(let details) = viewModel.state else { return nil }
