@@ -58,7 +58,7 @@ struct MovieCardView: View {
         MovieCardView(
             movie: Movie(
                 id: 0,
-                title: String(repeating: " ", count: 24),
+                title: "Placeholder Title",
                 overview: "",
                 posterPath: nil,
                 backdropPath: nil,
