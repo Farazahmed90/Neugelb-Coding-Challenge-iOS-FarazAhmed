@@ -1,0 +1,26 @@
+# macOS
+.DS_Store
+
+# Xcode user state
+xcuserdata/
+*.xcuserstate
+
+# Build artifacts
+DerivedData/
+build/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# SPM
+.swiftpm/
+.build/
+
+# Secrets — never committed; see README for setup
+Secrets.plist
+
+# Session planning notes (not a deliverable)
+PLAN.md
+
+# Challenge brief (distributed separately)
+NGLB_iOS-Dev_Challenge.pdf
