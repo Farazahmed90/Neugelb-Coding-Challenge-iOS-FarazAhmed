@@ -38,7 +38,7 @@ struct MovieSearchResultsView: View {
                     onScrollStarted: { viewModel.dismissSuggestions() }
                 )
                 .opacity(viewModel.isRefreshing ? 0.55 : 1)
-                .animation(.easeInOut(duration: 0.2), value: viewModel.isRefreshing)
+                .animation(.easeInOut(duration: 0.3), value: viewModel.isRefreshing)
             }
         }
     }

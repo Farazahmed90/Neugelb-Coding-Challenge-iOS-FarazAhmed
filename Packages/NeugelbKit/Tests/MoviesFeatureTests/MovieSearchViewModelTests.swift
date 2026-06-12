@@ -223,6 +223,24 @@ struct MovieSearchViewModelTests {
         #expect(!viewModel.isRefreshing)
     }
 
+    @Test func identicalResultsKeepExistingPaginator() async {
+        let repository = MovieRepositoryMock(searchResults: [
+            .success(makePage(ids: [1, 2], pageNumber: 1, totalPages: 3)),
+            .success(makePage(ids: [1, 2], pageNumber: 1, totalPages: 3)),
+        ])
+        let viewModel = makeViewModel(repository: repository)
+        viewModel.query = "batm"
+        await viewModel.settle()
+        let original = viewModel.paginator
+
+        viewModel.query = "batma"
+        await viewModel.settle()
+
+        // Same result set must not swap the paginator: no visual change,
+        // and pagination progress survives.
+        #expect(viewModel.paginator === original)
+    }
+
     @Test func dismissSuggestionsHidesPanelUntilNextKeystroke() async {
         let repository = MovieRepositoryMock(searchResults: [
             .success(makePage(ids: [1], pageNumber: 1, totalPages: 1)),
