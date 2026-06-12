@@ -7,6 +7,18 @@ struct MovieSearchResultsView: View {
     let viewModel: MovieSearchViewModel
 
     var body: some View {
+        ZStack {
+            // Skeleton, results, and empty states hand off with the same
+            // blur-to-sharp language as the cards.
+            phaseContent
+                .id(viewModel.phase)
+                .transition(.blurReplace)
+        }
+        .animation(.smooth(duration: 0.35), value: viewModel.phase)
+    }
+
+    @ViewBuilder
+    private var phaseContent: some View {
         switch viewModel.phase {
         case .idle:
             ContentUnavailableView {
