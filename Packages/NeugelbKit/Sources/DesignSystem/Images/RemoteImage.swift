@@ -15,27 +15,32 @@ public struct RemoteImage: View {
     }
 
     public var body: some View {
-        ZStack {
-            if let loadedImage {
-                Image(uiImage: loadedImage)
-                    .resizable()
-                    .scaledToFill()
-                    .transition(.opacity)
-            } else {
-                placeholder
+        // The image lives in an overlay because scaledToFill reports its
+        // oversized covering size as layout size; an overlay keeps this
+        // view exactly the size its container proposes, on any device.
+        Color.clear
+            .overlay {
+                if let loadedImage {
+                    Image(uiImage: loadedImage)
+                        .resizable()
+                        .scaledToFill()
+                        .transition(.opacity)
+                } else {
+                    placeholder
+                }
             }
-        }
-        .task(id: url) {
-            guard let url else {
-                loadedImage = nil
-                return
+            .clipped()
+            .task(id: url) {
+                guard let url else {
+                    loadedImage = nil
+                    return
+                }
+                guard loadedImage == nil else { return }
+                let image = try? await imageLoader.image(for: url)
+                withAnimation(.easeIn(duration: 0.15)) {
+                    loadedImage = image
+                }
             }
-            guard loadedImage == nil else { return }
-            let image = try? await imageLoader.image(for: url)
-            withAnimation(.easeIn(duration: 0.15)) {
-                loadedImage = image
-            }
-        }
     }
 
     private var placeholder: some View {
