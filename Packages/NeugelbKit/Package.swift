@@ -17,7 +17,10 @@ let package = Package(
             name: "MoviesData",
             dependencies: ["MoviesDomain"]
         ),
-        .target(name: "DesignSystem"),
+        .target(
+            name: "DesignSystem",
+            resources: [.process("Resources")]
+        ),
         .target(
             name: "MoviesFeature",
             dependencies: ["MoviesDomain", "DesignSystem"],

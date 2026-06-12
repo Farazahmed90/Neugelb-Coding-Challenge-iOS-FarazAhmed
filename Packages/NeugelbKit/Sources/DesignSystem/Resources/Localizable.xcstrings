@@ -1,0 +1,17 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Rated %@ out of 10" : {
+      "comment" : "Accessibility label of the rating badge. The argument is the average vote.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bewertet mit %@ von 10"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
