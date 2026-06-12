@@ -220,6 +220,7 @@ struct MovieSearchViewModelTests {
 
         await viewModel.settle()
         #expect(viewModel.results.map(\.id) == [2])
+        #expect(!viewModel.isRefreshing)
     }
 
     @Test func dismissSuggestionsHidesPanelUntilNextKeystroke() async {

@@ -20,9 +20,13 @@ struct MovieGridView: View {
                         MovieCardView(movie: movie, posterURL: posterURL(movie))
                     }
                     .buttonStyle(.plain)
+                    .transition(.opacity)
                     .task { await paginator.loadMoreIfNeeded(after: movie) }
                 }
             }
+            // Crossfade result-set changes: cells shared between the old
+            // and new set glide in place, the rest fade.
+            .animation(.snappy(duration: 0.3), value: paginator.items)
             .padding(.horizontal)
 
             footer
