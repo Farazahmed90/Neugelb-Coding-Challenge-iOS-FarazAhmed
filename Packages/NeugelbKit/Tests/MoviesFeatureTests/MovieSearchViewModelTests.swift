@@ -184,6 +184,26 @@ struct MovieSearchViewModelTests {
         #expect(viewModel.suggestions == ["Movie 2"])
     }
 
+    @Test func submitSearchesImmediatelyAndHidesSuggestions() async {
+        let repository = MovieRepositoryMock(searchResults: [
+            .success(makePage(ids: [1], pageNumber: 1, totalPages: 1))
+        ])
+        // Long debounce proves submit bypasses it.
+        let viewModel = MovieSearchViewModel(
+            repository: repository,
+            imageURLResolver: ImageURLResolverStub(),
+            debounce: .seconds(60)
+        )
+
+        viewModel.query = "batman"
+        viewModel.submit()
+        await viewModel.settle()
+
+        #expect(repository.requestedQueries == ["batman"])
+        #expect(viewModel.phase == .loaded)
+        #expect(viewModel.suggestions.isEmpty)
+    }
+
     @Test func deallocatesWithPendingDebounce() async {
         let repository = MovieRepositoryMock()
         var viewModel: MovieSearchViewModel? = makeViewModel(repository: repository)
