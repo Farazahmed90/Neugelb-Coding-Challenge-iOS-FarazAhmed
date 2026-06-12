@@ -58,6 +58,51 @@ struct TMDBMovieRepositoryTests {
         #expect(details.genres == [Genre(id: 18, name: "Drama"), Genre(id: 80, name: "Crime")])
     }
 
+    @Test(arguments: [
+        (401, MovieRepositoryError.unauthorized),
+        (403, MovieRepositoryError.unauthorized),
+        (404, MovieRepositoryError.notFound),
+        (500, MovieRepositoryError.serverUnavailable),
+        (418, MovieRepositoryError.unknown),
+    ])
+    func mapsStatusCodesToDomainErrors(statusCode: Int, expected: MovieRepositoryError) async {
+        let http = HTTPClientMock(.success(data: Data(), statusCode: statusCode))
+        let client = TMDBAPIClient(
+            httpClient: http, tokenProvider: StaticTokenProvider(), configuration: .test
+        )
+        let repository = TMDBMovieRepository(client: client)
+
+        await #expect(throws: expected) {
+            _ = try await repository.latestMovies(page: 1)
+        }
+    }
+
+    @Test func mapsTransportFailuresToNetworkError() async {
+        let http = HTTPClientMock(.failure(URLError(.notConnectedToInternet)))
+        let client = TMDBAPIClient(
+            httpClient: http, tokenProvider: StaticTokenProvider(), configuration: .test
+        )
+        let repository = TMDBMovieRepository(client: client)
+
+        await #expect(throws: MovieRepositoryError.network) {
+            _ = try await repository.latestMovies(page: 1)
+        }
+    }
+
+    @Test func passesCancellationThroughUnmapped() async {
+        let http = HTTPClientMock(.failure(URLError(.cancelled)))
+        let client = TMDBAPIClient(
+            httpClient: http, tokenProvider: StaticTokenProvider(), configuration: .test
+        )
+        let repository = TMDBMovieRepository(client: client)
+
+        await #expect {
+            _ = try await repository.latestMovies(page: 1)
+        } throws: { error in
+            error is CancellationError
+        }
+    }
+
     @Test func mapsSearchResultsToDomain() async throws {
         let repository = try makeRepository(returning: "search_movies")
 
