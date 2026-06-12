@@ -6,6 +6,7 @@ struct RootView: View {
     let dependencies: AppDependencies
 
     @State private var movieListViewModel: MovieListViewModel
+    @State private var searchViewModel: MovieSearchViewModel
 
     init(dependencies: AppDependencies) {
         self.dependencies = dependencies
@@ -15,11 +16,17 @@ struct RootView: View {
                 imageURLResolver: dependencies.imageURLResolver
             )
         )
+        _searchViewModel = State(
+            initialValue: MovieSearchViewModel(
+                repository: dependencies.movieRepository,
+                imageURLResolver: dependencies.imageURLResolver
+            )
+        )
     }
 
     var body: some View {
         NavigationStack {
-            MovieListScreen(viewModel: movieListViewModel)
+            MovieListScreen(viewModel: movieListViewModel, searchViewModel: searchViewModel)
                 .navigationDestination(for: Movie.self) { movie in
                     MovieDetailScreen(
                         viewModel: MovieDetailViewModel(

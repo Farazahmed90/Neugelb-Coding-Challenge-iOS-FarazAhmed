@@ -2,28 +2,50 @@ import DesignSystem
 import MoviesDomain
 import SwiftUI
 
-/// Latest movies in an adaptively sized poster grid with infinite
-/// scrolling, pull-to-refresh, and skeleton/error/empty states.
+/// Latest movies in an adaptive poster grid with infinite scrolling,
+/// pull-to-refresh, skeleton/error/empty states, and debounced search.
 public struct MovieListScreen: View {
     private let viewModel: MovieListViewModel
+    @Bindable private var searchViewModel: MovieSearchViewModel
 
-    public init(viewModel: MovieListViewModel) {
+    public init(viewModel: MovieListViewModel, searchViewModel: MovieSearchViewModel) {
         self.viewModel = viewModel
+        self.searchViewModel = searchViewModel
     }
 
-    private let columns = [GridItem(.adaptive(minimum: 150, maximum: 220), spacing: 16)]
-
     public var body: some View {
-        content
-            .navigationTitle(Text("Now Playing", bundle: .module))
-            .task { await viewModel.paginator.loadFirstIfNeeded() }
+        Group {
+            if searchViewModel.query.isEmpty {
+                listContent
+            } else {
+                MovieSearchResultsView(viewModel: searchViewModel)
+            }
+        }
+        .navigationTitle(Text("Now Playing", bundle: .module))
+        .overlay(alignment: .bottom) {
+            if !searchViewModel.suggestions.isEmpty {
+                SearchSuggestionsPanel(suggestions: searchViewModel.suggestions) { title in
+                    searchViewModel.acceptSuggestion(title)
+                }
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .animation(.bouncy(duration: 0.35, extraBounce: 0.06), value: searchViewModel.suggestions)
+        .searchable(
+            text: $searchViewModel.query,
+            prompt: Text("Search movies", bundle: .module)
+        )
+        .onSubmit(of: .search) {
+            searchViewModel.submit()
+        }
+        .task { await viewModel.paginator.loadFirstIfNeeded() }
     }
 
     @ViewBuilder
-    private var content: some View {
+    private var listContent: some View {
         switch viewModel.paginator.state {
         case .idle, .loadingFirst:
-            skeletonGrid
+            MovieSkeletonGrid()
         case .failedFirst:
             ErrorStateView(
                 message: viewModel.errorMessage(for: viewModel.paginator.state),
@@ -37,71 +59,12 @@ public struct MovieListScreen: View {
                 systemImage: "popcorn",
                 description: Text("Pull to refresh and check again.", bundle: .module)
             )
-        case .loaded(let loadMore):
-            movieGrid(loadMore: loadMore)
+        case .loaded:
+            MovieGridView(
+                paginator: viewModel.paginator,
+                posterURL: viewModel.posterURL
+            )
+            .refreshable { await viewModel.paginator.refresh() }
         }
-    }
-
-    private func movieGrid(loadMore: Paginator<Movie>.LoadMore) -> some View {
-        ScrollView {
-            LazyVGrid(columns: columns, spacing: 20) {
-                ForEach(viewModel.movies) { movie in
-                    NavigationLink(value: movie) {
-                        MovieCardView(movie: movie, posterURL: viewModel.posterURL(for: movie))
-                    }
-                    .buttonStyle(.plain)
-                    .task {
-                        await viewModel.paginator.loadMoreIfNeeded(after: movie)
-                    }
-                }
-            }
-            .padding(.horizontal)
-
-            listFooter(loadMore: loadMore)
-        }
-        .accessibilityIdentifier("movie_list.grid")
-        .refreshable { await viewModel.paginator.refresh() }
-    }
-
-    @ViewBuilder
-    private func listFooter(loadMore: Paginator<Movie>.LoadMore) -> some View {
-        switch loadMore {
-        case .loading, .ready:
-            // `.ready` shows the spinner too: by the time it is visible the
-            // threshold prefetch has fired, so this avoids a flicker swap.
-            ProgressView()
-                .padding(.vertical, 24)
-                .accessibilityLabel(Text("Loading more movies", bundle: .module))
-        case .failed:
-            VStack(spacing: 8) {
-                Text("Couldn't load more movies.", bundle: .module)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                Button {
-                    Task { await viewModel.paginator.retryLoadMore() }
-                } label: {
-                    Text("Try Again", bundle: .module)
-                }
-                .buttonStyle(.bordered)
-                .accessibilityIdentifier("movie_list.retry_more_button")
-            }
-            .padding(.vertical, 24)
-        case .exhausted:
-            EmptyView()
-        }
-    }
-
-    private var skeletonGrid: some View {
-        ScrollView {
-            LazyVGrid(columns: columns, spacing: 20) {
-                ForEach(0..<9, id: \.self) { _ in
-                    MovieCardView.skeleton
-                }
-            }
-            .padding(.horizontal)
-        }
-        .scrollDisabled(true)
-        .accessibilityIdentifier("movie_list.skeleton")
-        .accessibilityLabel(Text("Loading movies", bundle: .module))
     }
 }
