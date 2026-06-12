@@ -26,7 +26,7 @@ struct MovieGridView: View {
             }
             // Crossfade result-set changes: cells shared between the old
             // and new set glide in place, the rest fade.
-            .animation(.snappy(duration: 0.3), value: paginator.items)
+            .animation(.smooth(duration: 0.45), value: paginator.items)
             .padding(.horizontal)
 
             footer

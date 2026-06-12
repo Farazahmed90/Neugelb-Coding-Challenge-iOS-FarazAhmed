@@ -113,12 +113,22 @@ public final class MovieSearchViewModel {
     private func search(for trimmed: String) async {
         // Keep previous results on screen while re-searching; flipping to
         // the skeleton on every keystroke makes the grid flash.
+        var refreshCue: Task<Void, Never>?
         if paginator == nil {
             phase = .searching
         } else {
-            isRefreshing = true
+            // Grace period: fast responses come back before the dim is
+            // ever shown, so unchanged results don't blink.
+            refreshCue = Task { [weak self] in
+                try? await Task.sleep(for: .milliseconds(250))
+                guard !Task.isCancelled else { return }
+                self?.isRefreshing = true
+            }
         }
-        defer { isRefreshing = false }
+        defer {
+            refreshCue?.cancel()
+            isRefreshing = false
+        }
 
         let repository = repository
         let paginator = Paginator<Movie> { page in
@@ -134,8 +144,15 @@ public final class MovieSearchViewModel {
             self.paginator = nil
             phase = .failed(message: ErrorMessage.message(for: error))
         case .loaded:
-            self.paginator = paginator
-            phase = .loaded
+            // Identical result set: keep the current paginator (and its
+            // pagination progress) so the grid doesn't change at all.
+            if let current = self.paginator,
+               current.items.map(\.id) == paginator.items.map(\.id) {
+                phase = .loaded
+            } else {
+                self.paginator = paginator
+                phase = .loaded
+            }
         case .idle, .loadingFirst:
             // Cancelled mid-flight; a newer search owns the state now.
             break
