@@ -101,8 +101,17 @@ public final class MovieSearchViewModel {
         }
     }
 
+    /// Closes the suggestions panel (e.g. when the user starts scrolling).
+    public func dismissSuggestions() {
+        suggestionsVisible = false
+    }
+
     private func search(for trimmed: String) async {
-        phase = .searching
+        // Keep previous results on screen while re-searching; flipping to
+        // the skeleton on every keystroke makes the grid flash.
+        if paginator == nil {
+            phase = .searching
+        }
         let repository = repository
         let paginator = Paginator<Movie> { page in
             try await repository.searchMovies(matching: trimmed, page: page)

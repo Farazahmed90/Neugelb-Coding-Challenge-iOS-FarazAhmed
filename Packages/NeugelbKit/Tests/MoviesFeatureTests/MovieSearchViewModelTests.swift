@@ -204,6 +204,42 @@ struct MovieSearchViewModelTests {
         #expect(viewModel.suggestions.isEmpty)
     }
 
+    @Test func retypingKeepsResultsVisibleInsteadOfFlashingSkeleton() async {
+        let repository = MovieRepositoryMock(searchResults: [
+            .success(makePage(ids: [1], pageNumber: 1, totalPages: 1)),
+            .success(makePage(ids: [2], pageNumber: 1, totalPages: 1)),
+        ])
+        let viewModel = makeViewModel(repository: repository)
+        viewModel.query = "bat"
+        await viewModel.settle()
+
+        viewModel.query = "batman"
+        // Old results must stay on screen through debounce + reload.
+        #expect(viewModel.phase == .loaded)
+        #expect(viewModel.results.map(\.id) == [1])
+
+        await viewModel.settle()
+        #expect(viewModel.results.map(\.id) == [2])
+    }
+
+    @Test func dismissSuggestionsHidesPanelUntilNextKeystroke() async {
+        let repository = MovieRepositoryMock(searchResults: [
+            .success(makePage(ids: [1], pageNumber: 1, totalPages: 1)),
+            .success(makePage(ids: [2], pageNumber: 1, totalPages: 1)),
+        ])
+        let viewModel = makeViewModel(repository: repository)
+        viewModel.query = "bat"
+        await viewModel.settle()
+        #expect(!viewModel.suggestions.isEmpty)
+
+        viewModel.dismissSuggestions()
+        #expect(viewModel.suggestions.isEmpty)
+
+        viewModel.query = "batman"
+        await viewModel.settle()
+        #expect(!viewModel.suggestions.isEmpty)
+    }
+
     @Test func deallocatesWithPendingDebounce() async {
         let repository = MovieRepositoryMock()
         var viewModel: MovieSearchViewModel? = makeViewModel(repository: repository)

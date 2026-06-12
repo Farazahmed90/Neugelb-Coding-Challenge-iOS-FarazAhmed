@@ -8,6 +8,7 @@ struct MovieGridView: View {
     let paginator: Paginator<Movie>
     let posterURL: (Movie) -> URL?
     var accessibilityIdentifier = "movie_list.grid"
+    var onScrollStarted: (() -> Void)?
 
     static let columns = [GridItem(.adaptive(minimum: 150, maximum: 220), spacing: 16)]
 
@@ -27,6 +28,11 @@ struct MovieGridView: View {
             footer
         }
         .accessibilityIdentifier(accessibilityIdentifier)
+        .onScrollPhaseChange { _, newPhase in
+            if newPhase == .interacting {
+                onScrollStarted?()
+            }
+        }
     }
 
     @ViewBuilder

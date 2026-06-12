@@ -34,7 +34,8 @@ struct MovieSearchResultsView: View {
                 MovieGridView(
                     paginator: paginator,
                     posterURL: viewModel.posterURL,
-                    accessibilityIdentifier: "search.results_grid"
+                    accessibilityIdentifier: "search.results_grid",
+                    onScrollStarted: { viewModel.dismissSuggestions() }
                 )
             }
         }
