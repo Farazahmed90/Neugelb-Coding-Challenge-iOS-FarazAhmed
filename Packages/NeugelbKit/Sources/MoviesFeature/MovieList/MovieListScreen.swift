@@ -30,7 +30,7 @@ public struct MovieListScreen: View {
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
-        .animation(.snappy(duration: 0.25), value: searchViewModel.suggestions)
+        .animation(.bouncy(duration: 0.35, extraBounce: 0.06), value: searchViewModel.suggestions)
         .searchable(
             text: $searchViewModel.query,
             prompt: Text("Search movies", bundle: .module)

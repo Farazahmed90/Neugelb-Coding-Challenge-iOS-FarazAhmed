@@ -8,7 +8,7 @@ import Observation
 @MainActor
 @Observable
 public final class MovieSearchViewModel {
-    public enum Phase: Equatable {
+    public enum Phase: Equatable, Hashable {
         case idle
         case searching
         case loaded

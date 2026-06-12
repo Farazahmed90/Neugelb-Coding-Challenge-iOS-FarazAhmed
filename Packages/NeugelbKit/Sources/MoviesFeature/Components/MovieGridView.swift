@@ -12,31 +12,51 @@ struct MovieGridView: View {
 
     static let columns = [GridItem(.adaptive(minimum: 150, maximum: 220), spacing: 16)]
 
+    @State private var scrollPosition = ScrollPosition()
+
     var body: some View {
         ScrollView {
             LazyVGrid(columns: Self.columns, spacing: 20) {
-                ForEach(paginator.items) { movie in
+                ForEach(Array(paginator.items.enumerated()), id: \.element.id) { index, movie in
                     NavigationLink(value: movie) {
                         MovieCardView(movie: movie, posterURL: posterURL(movie))
                     }
                     .buttonStyle(.plain)
-                    .transition(.opacity)
+                    // Cards materialize blur-to-sharp in a staggered wave,
+                    // each one a beat after its neighbor.
+                    .transition(.blurReplace)
+                    .animation(
+                        .bouncy(duration: 0.45, extraBounce: 0.04)
+                            .delay(cascadeDelay(for: index)),
+                        value: paginator.items
+                    )
                     .task { await paginator.loadMoreIfNeeded(after: movie) }
                 }
             }
-            // Crossfade result-set changes: cells shared between the old
-            // and new set glide in place, the rest fade.
-            .animation(.smooth(duration: 0.45), value: paginator.items)
             .padding(.horizontal)
 
             footer
         }
+        .scrollPosition($scrollPosition)
         .accessibilityIdentifier(accessibilityIdentifier)
         .onScrollPhaseChange { _, newPhase in
             if newPhase == .interacting {
                 onScrollStarted?()
             }
         }
+        .onChange(of: paginator.items.first?.id) { old, new in
+            // A new leading result means a new result set: surface it.
+            guard old != nil, old != new else { return }
+            withAnimation(.smooth(duration: 0.4)) {
+                scrollPosition.scrollTo(edge: .top)
+            }
+        }
+    }
+
+    /// Wave delay within a visible window; appended pages share one beat
+    /// instead of queueing ever-longer delays.
+    private func cascadeDelay(for index: Int) -> Double {
+        min(Double(index % 15) * 0.03, 0.4)
     }
 
     @ViewBuilder
