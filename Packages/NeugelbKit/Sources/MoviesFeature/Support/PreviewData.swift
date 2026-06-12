@@ -47,7 +47,21 @@ struct PreviewMovieRepository: MovieRepository {
     }
 
     func movieDetails(id: Movie.ID) async throws -> MovieDetails {
-        throw MovieRepositoryError.notFound
+        if let failure { throw failure }
+        let movie = PreviewData.movies.first { $0.id == id } ?? PreviewData.movies[0]
+        return MovieDetails(
+            id: movie.id,
+            title: movie.title,
+            overview: movie.overview,
+            tagline: "Fear can hold you prisoner. Hope can set you free.",
+            posterPath: movie.posterPath,
+            backdropPath: movie.backdropPath,
+            releaseDate: movie.releaseDate,
+            runtimeMinutes: 142,
+            genres: [Genre(id: 18, name: "Drama"), Genre(id: 80, name: "Crime")],
+            voteAverage: movie.voteAverage,
+            voteCount: movie.voteCount
+        )
     }
 
     func searchMovies(matching query: String, page: Int) async throws -> Page<Movie> {
