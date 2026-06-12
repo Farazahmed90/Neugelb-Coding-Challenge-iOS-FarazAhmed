@@ -1,7 +1,7 @@
 import Foundation
 
 /// A movie as it appears in lists (now playing, search results).
-public struct Movie: Identifiable, Hashable, Sendable {
+public struct Movie: Identifiable, Hashable, Sendable, Codable {
     public let id: Int
     public let title: String
     public let overview: String

@@ -12,3 +12,5 @@ public struct Page<Item: Sendable & Hashable>: Sendable, Hashable {
         self.totalPages = totalPages
     }
 }
+
+extension Page: Codable where Item: Codable {}
