@@ -8,6 +8,7 @@ let package = Package(
     products: [
         .library(name: "MoviesDomain", targets: ["MoviesDomain"]),
         .library(name: "MoviesData", targets: ["MoviesData"]),
+        .library(name: "DesignSystem", targets: ["DesignSystem"]),
     ],
     targets: [
         .target(name: "MoviesDomain"),
@@ -15,6 +16,7 @@ let package = Package(
             name: "MoviesData",
             dependencies: ["MoviesDomain"]
         ),
+        .target(name: "DesignSystem"),
         .testTarget(name: "MoviesDomainTests", dependencies: ["MoviesDomain"]),
         .testTarget(
             name: "MoviesDataTests",
