@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		AA0000000000000000000001 /* MoviesDomain in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000000003 /* MoviesDomain */; };
 		AA0000000000000000000002 /* MoviesData in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000000004 /* MoviesData */; };
+		AA0000000000000000000006 /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000000008 /* DesignSystem */; };
+		AA0000000000000000000007 /* MoviesFeature in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000000009 /* MoviesFeature */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +32,8 @@
 			files = (
 				AA0000000000000000000001 /* MoviesDomain in Frameworks */,
 				AA0000000000000000000002 /* MoviesData in Frameworks */,
+				AA0000000000000000000006 /* DesignSystem in Frameworks */,
+				AA0000000000000000000007 /* MoviesFeature in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -74,6 +78,8 @@
 			packageProductDependencies = (
 				AA0000000000000000000003 /* MoviesDomain */,
 				AA0000000000000000000004 /* MoviesData */,
+				AA0000000000000000000008 /* DesignSystem */,
+				AA0000000000000000000009 /* MoviesFeature */,
 			);
 			productName = "NeugelbCodingChallenge-iOS-FarazAhmed";
 			productReference = 15D251242FDC51920062328F /* NeugelbCodingChallenge-iOS-FarazAhmed.app */;
@@ -363,6 +369,14 @@
 		AA0000000000000000000004 /* MoviesData */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = MoviesData;
+		};
+		AA0000000000000000000008 /* DesignSystem */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DesignSystem;
+		};
+		AA0000000000000000000009 /* MoviesFeature */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MoviesFeature;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
