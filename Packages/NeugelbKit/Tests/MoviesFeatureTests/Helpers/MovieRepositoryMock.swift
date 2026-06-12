@@ -39,15 +39,19 @@ final class MovieRepositoryMock: MovieRepository, @unchecked Sendable {
     private let lock = NSLock()
     private var latestResults: [Result<Page<Movie>, any Error>]
     private var detailsResults: [Result<MovieDetails, any Error>]
+    private var searchResults: [Result<Page<Movie>, any Error>]
     private(set) var requestedPages: [Int] = []
     private(set) var requestedDetailIDs: [Int] = []
+    private(set) var requestedQueries: [String] = []
 
     init(
         latestResults: [Result<Page<Movie>, any Error>] = [],
-        detailsResults: [Result<MovieDetails, any Error>] = []
+        detailsResults: [Result<MovieDetails, any Error>] = [],
+        searchResults: [Result<Page<Movie>, any Error>] = []
     ) {
         self.latestResults = latestResults
         self.detailsResults = detailsResults
+        self.searchResults = searchResults
     }
 
     func latestMovies(page: Int) async throws -> Page<Movie> {
@@ -67,7 +71,11 @@ final class MovieRepositoryMock: MovieRepository, @unchecked Sendable {
     }
 
     func searchMovies(matching query: String, page: Int) async throws -> Page<Movie> {
-        throw MovieRepositoryError.notFound
+        try lock.withLock {
+            requestedQueries.append(query)
+            precondition(!searchResults.isEmpty, "MovieRepositoryMock ran out of stubs")
+            return try searchResults.removeFirst().get()
+        }
     }
 }
 
