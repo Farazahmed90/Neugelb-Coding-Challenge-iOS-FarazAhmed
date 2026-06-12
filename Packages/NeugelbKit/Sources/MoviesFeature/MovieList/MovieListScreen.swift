@@ -26,6 +26,20 @@ public struct MovieListScreen: View {
             text: $searchViewModel.query,
             prompt: Text("Search movies", bundle: .module)
         )
+        .searchSuggestions {
+            ForEach(searchViewModel.suggestions, id: \.self) { title in
+                Button {
+                    searchViewModel.acceptSuggestion(title)
+                } label: {
+                    Label {
+                        Text(title)
+                    } icon: {
+                        Image(systemName: "magnifyingglass")
+                    }
+                }
+                .accessibilityIdentifier("search.suggestion")
+            }
+        }
         .task { await viewModel.paginator.loadFirstIfNeeded() }
     }
 

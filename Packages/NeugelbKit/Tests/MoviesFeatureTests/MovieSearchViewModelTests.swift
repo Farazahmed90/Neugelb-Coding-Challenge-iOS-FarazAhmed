@@ -127,6 +127,63 @@ struct MovieSearchViewModelTests {
         #expect(repository.requestedQueries == ["batman", "batman"])
     }
 
+    @Test func suggestionsComeFromDistinctResultTitles() async {
+        func movie(_ id: Int, _ title: String) -> Movie {
+            Movie(
+                id: id, title: title, overview: "", posterPath: nil,
+                backdropPath: nil, releaseDate: nil, voteAverage: 0, voteCount: 0
+            )
+        }
+        let movies = [
+            movie(1, "Batman"),
+            movie(2, "Batman"),  // duplicate title must collapse
+            movie(3, "Batman Returns"),
+        ]
+        let repository = MovieRepositoryMock(searchResults: [
+            .success(Page(items: movies, pageNumber: 1, totalPages: 1))
+        ])
+        let viewModel = makeViewModel(repository: repository)
+
+        viewModel.query = "bat"
+        await viewModel.settle()
+
+        #expect(viewModel.suggestions == ["Batman", "Batman Returns"])
+    }
+
+    @Test func acceptingSuggestionSearchesItAndHidesSuggestions() async {
+        let repository = MovieRepositoryMock(searchResults: [
+            .success(makePage(ids: [1], pageNumber: 1, totalPages: 1)),
+            .success(makePage(ids: [1], pageNumber: 1, totalPages: 1)),
+        ])
+        let viewModel = makeViewModel(repository: repository)
+        viewModel.query = "mov"
+        await viewModel.settle()
+        #expect(!viewModel.suggestions.isEmpty)
+
+        viewModel.acceptSuggestion("Movie 1")
+        await viewModel.settle()
+
+        #expect(repository.requestedQueries == ["mov", "Movie 1"])
+        #expect(viewModel.suggestions.isEmpty)
+        #expect(viewModel.phase == .loaded)
+    }
+
+    @Test func typingAgainRestoresSuggestions() async {
+        let repository = MovieRepositoryMock(searchResults: [
+            .success(makePage(ids: [1], pageNumber: 1, totalPages: 1)),
+            .success(makePage(ids: [2], pageNumber: 1, totalPages: 1)),
+        ])
+        let viewModel = makeViewModel(repository: repository)
+        viewModel.acceptSuggestion("Movie 1")
+        await viewModel.settle()
+        #expect(viewModel.suggestions.isEmpty)
+
+        viewModel.query = "Movie 2"
+        await viewModel.settle()
+
+        #expect(viewModel.suggestions == ["Movie 2"])
+    }
+
     @Test func deallocatesWithPendingDebounce() async {
         let repository = MovieRepositoryMock()
         var viewModel: MovieSearchViewModel? = makeViewModel(repository: repository)
