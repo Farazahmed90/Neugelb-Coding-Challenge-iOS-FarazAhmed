@@ -1,38 +1,33 @@
 #if DEBUG
 import SwiftUI
 
-#Preview("Loaded") {
+@MainActor
+private func makeScreen(failure: PreviewMovieRepository = PreviewMovieRepository()) -> some View {
     NavigationStack {
         MovieListScreen(
             viewModel: MovieListViewModel(
-                repository: PreviewMovieRepository(),
+                repository: failure,
+                imageURLResolver: PreviewImageURLResolver()
+            ),
+            searchViewModel: MovieSearchViewModel(
+                repository: failure,
                 imageURLResolver: PreviewImageURLResolver()
             )
         )
     }
+}
+
+#Preview("Loaded") {
+    makeScreen()
 }
 
 #Preview("Failure") {
-    NavigationStack {
-        MovieListScreen(
-            viewModel: MovieListViewModel(
-                repository: PreviewMovieRepository(failure: .network),
-                imageURLResolver: PreviewImageURLResolver()
-            )
-        )
-    }
+    makeScreen(failure: PreviewMovieRepository(failure: .network))
 }
 
 #Preview("Dark, Large Type") {
-    NavigationStack {
-        MovieListScreen(
-            viewModel: MovieListViewModel(
-                repository: PreviewMovieRepository(),
-                imageURLResolver: PreviewImageURLResolver()
-            )
-        )
-    }
-    .preferredColorScheme(.dark)
-    .dynamicTypeSize(.accessibility1)
+    makeScreen()
+        .preferredColorScheme(.dark)
+        .dynamicTypeSize(.accessibility1)
 }
 #endif
