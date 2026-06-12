@@ -22,6 +22,10 @@ public final class MovieSearchViewModel {
     public private(set) var phase: Phase = .idle
     public private(set) var paginator: Paginator<Movie>?
 
+    /// True while a newer search replaces already-visible results;
+    /// the UI dims the grid instead of flashing a skeleton.
+    public private(set) var isRefreshing = false
+
     public var results: [Movie] { paginator?.items ?? [] }
 
     /// Distinct top result titles offered as search-field completions.
@@ -111,7 +115,11 @@ public final class MovieSearchViewModel {
         // the skeleton on every keystroke makes the grid flash.
         if paginator == nil {
             phase = .searching
+        } else {
+            isRefreshing = true
         }
+        defer { isRefreshing = false }
+
         let repository = repository
         let paginator = Paginator<Movie> { page in
             try await repository.searchMovies(matching: trimmed, page: page)

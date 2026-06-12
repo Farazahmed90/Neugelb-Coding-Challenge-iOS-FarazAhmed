@@ -37,6 +37,8 @@ struct MovieSearchResultsView: View {
                     accessibilityIdentifier: "search.results_grid",
                     onScrollStarted: { viewModel.dismissSuggestions() }
                 )
+                .opacity(viewModel.isRefreshing ? 0.55 : 1)
+                .animation(.easeInOut(duration: 0.2), value: viewModel.isRefreshing)
             }
         }
     }
