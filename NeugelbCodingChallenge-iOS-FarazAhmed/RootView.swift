@@ -20,7 +20,15 @@ struct RootView: View {
     var body: some View {
         NavigationStack {
             MovieListScreen(viewModel: movieListViewModel)
-            // Movie detail destination lands with #Neugelb-003.
+                .navigationDestination(for: Movie.self) { movie in
+                    MovieDetailScreen(
+                        viewModel: MovieDetailViewModel(
+                            movie: movie,
+                            repository: dependencies.movieRepository,
+                            imageURLResolver: dependencies.imageURLResolver
+                        )
+                    )
+                }
         }
         .environment(\.imageLoader, dependencies.imageLoader)
     }
