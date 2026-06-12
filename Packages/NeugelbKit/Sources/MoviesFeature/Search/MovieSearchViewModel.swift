@@ -67,6 +67,17 @@ public final class MovieSearchViewModel {
         queryChanged()
     }
 
+    /// Keyboard search key: skip the debounce, search now, close panel.
+    public func submit() {
+        debounceTask?.cancel()
+        suggestionsVisible = false
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed.count >= 2 else { return }
+        debounceTask = Task { [weak self] in
+            await self?.search(for: trimmed)
+        }
+    }
+
     /// Awaits the pending debounce + search; used by tests for determinism.
     func settle() async {
         await debounceTask?.value

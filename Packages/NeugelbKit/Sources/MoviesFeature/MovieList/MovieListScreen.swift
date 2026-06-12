@@ -22,23 +22,21 @@ public struct MovieListScreen: View {
             }
         }
         .navigationTitle(Text("Now Playing", bundle: .module))
+        .overlay(alignment: .bottom) {
+            if !searchViewModel.suggestions.isEmpty {
+                SearchSuggestionsPanel(suggestions: searchViewModel.suggestions) { title in
+                    searchViewModel.acceptSuggestion(title)
+                }
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .animation(.snappy(duration: 0.25), value: searchViewModel.suggestions)
         .searchable(
             text: $searchViewModel.query,
             prompt: Text("Search movies", bundle: .module)
         )
-        .searchSuggestions {
-            ForEach(searchViewModel.suggestions, id: \.self) { title in
-                Button {
-                    searchViewModel.acceptSuggestion(title)
-                } label: {
-                    Label {
-                        Text(title)
-                    } icon: {
-                        Image(systemName: "magnifyingglass")
-                    }
-                }
-                .accessibilityIdentifier("search.suggestion")
-            }
+        .onSubmit(of: .search) {
+            searchViewModel.submit()
         }
         .task { await viewModel.paginator.loadFirstIfNeeded() }
     }
