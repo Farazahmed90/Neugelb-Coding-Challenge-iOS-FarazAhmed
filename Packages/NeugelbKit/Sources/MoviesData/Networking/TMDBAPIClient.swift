@@ -23,10 +23,19 @@ public struct TMDBAPIClient: Sendable {
     }
 
     public func request<Response: Decodable & Sendable>(
-        _ endpoint: TMDBEndpoint
+        _ endpoint: some Endpoint
     ) async throws -> Response {
         let token = try await tokenProvider.accessToken()
-        let urlRequest = endpoint.urlRequest(configuration: configuration, accessToken: token)
+        let urlRequest = endpoint.urlRequest(
+            baseURL: configuration.apiBaseURL,
+            defaultQueryItems: [
+                URLQueryItem(name: "language", value: configuration.language)
+            ],
+            defaultHeaders: [
+                "Authorization": "Bearer \(token)",
+                "Accept": "application/json",
+            ]
+        )
 
         let data: Data
         let response: HTTPURLResponse
@@ -35,8 +44,8 @@ public struct TMDBAPIClient: Sendable {
         } catch is CancellationError {
             throw CancellationError()
         } catch let error as URLError where error.code == .cancelled {
-            // Surface cancellation as cancellation, never as a user-facing
-            // network error, so view models can ignore it cleanly.
+            // Report cancellation as cancellation, not a network error, so view
+            // models can ignore it.
             throw CancellationError()
         } catch let error as APIError {
             throw error

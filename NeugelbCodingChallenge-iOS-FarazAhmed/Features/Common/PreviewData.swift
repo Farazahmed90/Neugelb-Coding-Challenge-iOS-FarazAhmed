@@ -2,7 +2,6 @@
 import Foundation
 import MoviesDomain
 
-/// Sample content for SwiftUI previews.
 enum PreviewData {
     static let movies: [Movie] = [
         Movie(
@@ -60,7 +59,19 @@ struct PreviewMovieRepository: MovieRepository {
             runtimeMinutes: 142,
             genres: [Genre(id: 18, name: "Drama"), Genre(id: 80, name: "Crime")],
             voteAverage: movie.voteAverage,
-            voteCount: movie.voteCount
+            voteCount: movie.voteCount,
+            status: "Released",
+            originalLanguage: "en",
+            budget: 25_000_000,
+            revenue: 28_341_469,
+            productionCompanies: ["Castle Rock Entertainment"],
+            cast: [
+                CastMember(id: 1, name: "Tim Robbins", character: "Andy Dufresne", profilePath: nil),
+                CastMember(id: 2, name: "Morgan Freeman", character: "Ellis Boyd 'Red' Redding", profilePath: nil),
+                CastMember(id: 3, name: "Bob Gunton", character: "Warden Norton", profilePath: nil),
+                CastMember(id: 4, name: "William Sadler", character: "Heywood", profilePath: nil),
+            ],
+            trailerYouTubeID: "NmzuHjWmXOc"
         )
     }
 

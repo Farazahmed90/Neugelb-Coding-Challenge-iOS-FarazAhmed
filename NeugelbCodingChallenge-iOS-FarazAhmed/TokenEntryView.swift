@@ -13,17 +13,17 @@ struct TokenEntryView: View {
         NavigationStack {
             Form {
                 Section {
-                    SecureField("TMDB Access Token", text: $token)
+                    SecureField(String(localized: L10n.TokenEntry.accessTokenLabel), text: $token)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                         .accessibilityIdentifier("token_entry.field")
                 } header: {
-                    Text("TMDB Access Token")
+                    Text(L10n.TokenEntry.accessTokenLabel)
                 } footer: {
-                    Text("Paste your TMDB API Read Access Token (v4) to load movies. It is stored securely in the Keychain. You can create a free token at themoviedb.org/settings/api.")
+                    Text(L10n.TokenEntry.instructions)
                 }
             }
-            .navigationTitle(Text("Welcome"))
+            .navigationTitle(Text(L10n.TokenEntry.title))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
@@ -37,7 +37,7 @@ struct TokenEntryView: View {
                         if isSaving {
                             ProgressView()
                         } else {
-                            Text("Save")
+                            Text(L10n.TokenEntry.save)
                         }
                     }
                     .disabled(token.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSaving)

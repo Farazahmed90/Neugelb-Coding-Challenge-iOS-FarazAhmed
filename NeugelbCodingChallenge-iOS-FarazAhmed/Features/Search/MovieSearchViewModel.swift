@@ -2,57 +2,49 @@ import Foundation
 import MoviesDomain
 import Observation
 
-/// Debounced movie search. Each keystroke restarts the debounce window;
-/// in-flight requests are cancelled through structured concurrency and
-/// stale responses are dropped before they can overwrite newer results.
+/// Debounced search. Each keystroke restarts the debounce, cancels the
+/// in-flight request, and ignores any late response so it can't overwrite
+/// newer results.
 @MainActor
 @Observable
-public final class MovieSearchViewModel {
-    public enum Phase: Equatable, Hashable {
+final class MovieSearchViewModel {
+    enum Phase: Equatable, Hashable {
         case idle
         case searching
         case loaded
         case failed(message: String)
     }
 
-    public var query = "" {
+    var query = "" {
         didSet { queryChanged() }
     }
 
-    public private(set) var phase: Phase = .idle
-    public private(set) var paginator: Paginator<Movie>?
+    private(set) var phase: Phase = .idle
+    private(set) var paginator: Paginator<Movie>?
 
-    /// True while a newer search replaces already-visible results;
-    /// the UI dims the grid instead of flashing a skeleton.
-    public private(set) var isRefreshing = false
+    /// True while new results are loading over old ones, so the UI dims the grid instead of showing a skeleton.
+    private(set) var isRefreshing = false
 
-    public var results: [Movie] { paginator?.items ?? [] }
+    var results: [Movie] { paginator?.items ?? [] }
 
-    /// Distinct top result titles offered as search-field completions.
-    public var suggestions: [String] {
+    var suggestions: [String] {
         guard phase == .loaded, suggestionsVisible else { return [] }
         var seen = Set<String>()
-        let titles = results.prefix(20).map(\.title)
-            .filter { seen.insert($0.lowercased()).inserted }
+        let titles = results.prefix(20).map(\.title).filter { seen.insert($0.lowercased()).inserted }
         return Array(titles.prefix(8))
     }
 
-    /// Suggestions hide after one is chosen and reappear on typing,
-    /// otherwise the suggestion overlay would keep covering the results.
+    /// Hide suggestions after one is picked, and show them again on the next
+    /// keystroke, so the panel doesn't keep covering the results.
     private var suggestionsVisible = true
     private var isApplyingSuggestion = false
-
-    public func acceptSuggestion(_ title: String) {
-        isApplyingSuggestion = true
-        query = title
-    }
 
     private let repository: any MovieRepository
     private let imageURLResolver: any ImageURLResolving
     private let debounce: Duration
     private var debounceTask: Task<Void, Never>?
 
-    public init(
+    init(
         repository: any MovieRepository,
         imageURLResolver: any ImageURLResolving,
         debounce: Duration = .milliseconds(300)
@@ -62,17 +54,21 @@ public final class MovieSearchViewModel {
         self.debounce = debounce
     }
 
-    public func posterURL(for movie: Movie) -> URL? {
+    func posterURL(for movie: Movie) -> URL? {
         imageURLResolver.imageURL(forPath: movie.posterPath, kind: .posterThumbnail)
     }
 
-    /// Re-runs the current query after a failure.
-    public func retry() {
+    func acceptSuggestion(_ title: String) {
+        isApplyingSuggestion = true
+        query = title
+    }
+
+    func retry() {
         queryChanged()
     }
 
-    /// Keyboard search key: skip the debounce, search now, close panel.
-    public func submit() {
+    /// Search key on the keyboard: skip the debounce, search now, hide the panel.
+    func submit() {
         debounceTask?.cancel()
         suggestionsVisible = false
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -80,6 +76,11 @@ public final class MovieSearchViewModel {
         debounceTask = Task { [weak self] in
             await self?.search(for: trimmed)
         }
+    }
+
+    func dismissSuggestions() {
+        guard suggestionsVisible else { return }
+        suggestionsVisible = false
     }
 
     /// Awaits the pending debounce + search; used by tests for determinism.
@@ -105,20 +106,12 @@ public final class MovieSearchViewModel {
         }
     }
 
-    /// Closes the suggestions panel (e.g. when the user starts scrolling).
-    public func dismissSuggestions() {
-        suggestionsVisible = false
-    }
-
     private func search(for trimmed: String) async {
-        // Keep previous results on screen while re-searching; flipping to
-        // the skeleton on every keystroke makes the grid flash.
         var refreshCue: Task<Void, Never>?
         if paginator == nil {
             phase = .searching
         } else {
-            // Grace period: fast responses come back before the dim is
-            // ever shown, so unchanged results don't blink.
+            // Short delay before dimming, so a fast response doesn't flash a dim.
             refreshCue = Task { [weak self] in
                 try? await Task.sleep(for: .milliseconds(250))
                 guard !Task.isCancelled else { return }
@@ -144,8 +137,8 @@ public final class MovieSearchViewModel {
             self.paginator = nil
             phase = .failed(message: ErrorMessage.message(for: error))
         case .loaded:
-            // Identical result set: keep the current paginator (and its
-            // pagination progress) so the grid doesn't change at all.
+            // Same results as before: keep the current paginator (and its page
+            // progress) so the grid doesn't reload.
             if let current = self.paginator,
                current.items.map(\.id) == paginator.items.map(\.id) {
                 phase = .loaded
@@ -154,7 +147,6 @@ public final class MovieSearchViewModel {
                 phase = .loaded
             }
         case .idle, .loadingFirst:
-            // Cancelled mid-flight; a newer search owns the state now.
             break
         }
     }

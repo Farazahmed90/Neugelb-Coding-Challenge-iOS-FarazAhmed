@@ -8,7 +8,7 @@ struct SearchSuggestionsPanel: View {
     let suggestions: [String]
     let onSelect: (String) -> Void
 
-    private let maxHeight: CGFloat = 240
+    private let maxHeight: CGFloat = 196
     @State private var contentHeight: CGFloat = 0
 
     var body: some View {
@@ -31,7 +31,7 @@ struct SearchSuggestionsPanel: View {
                                 .foregroundStyle(.tertiary)
                         }
                         .padding(.horizontal, 16)
-                        .padding(.vertical, 12)
+                        .padding(.vertical, 9)
                         .contentShape(.rect)
                     }
                     .buttonStyle(.plain)
@@ -55,6 +55,6 @@ struct SearchSuggestionsPanel: View {
         .padding(.horizontal)
         .padding(.bottom, 8)
         .accessibilityElement(children: .contain)
-        .accessibilityLabel(Text("Search suggestions", bundle: .module))
+        .accessibilityLabel(Text(L10n.Search.suggestionsLabel))
     }
 }

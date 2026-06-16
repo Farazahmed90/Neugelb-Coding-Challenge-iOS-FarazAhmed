@@ -13,8 +13,26 @@ struct TMDBAPIClientTests {
             httpClient: http, tokenProvider: StaticTokenProvider(), configuration: .test
         )
 
-        let probe: Probe = try await client.request(.nowPlaying(page: 1))
+        let probe: Probe = try await client.request(TMDBEndpoint.nowPlaying(page: 1))
         #expect(probe == Probe(id: 7))
+    }
+
+    @Test func injectsBearerAuthAcceptAndLanguage() async throws {
+        let http = HTTPClientMock(.success(data: Data(#"{"id": 1}"#.utf8), statusCode: 200))
+        let client = TMDBAPIClient(
+            httpClient: http,
+            tokenProvider: StaticTokenProvider(token: "secret-token"),
+            configuration: .test
+        )
+
+        let _: Probe = try await client.request(TMDBEndpoint.nowPlaying(page: 1))
+
+        let request = try #require(await http.requests.first)
+        #expect(request.value(forHTTPHeaderField: "Authorization") == "Bearer secret-token")
+        #expect(request.value(forHTTPHeaderField: "Accept") == "application/json")
+
+        let items = URLComponents(url: request.url!, resolvingAgainstBaseURL: false)!.queryItems!
+        #expect(items.contains(URLQueryItem(name: "language", value: "en-US")))
     }
 
     @Test(arguments: [401, 404, 500])
@@ -25,7 +43,7 @@ struct TMDBAPIClientTests {
         )
 
         await #expect {
-            let _: Probe = try await client.request(.nowPlaying(page: 1))
+            let _: Probe = try await client.request(TMDBEndpoint.nowPlaying(page: 1))
         } throws: { error in
             guard case APIError.unacceptableStatus(let code) = error else { return false }
             return code == statusCode
@@ -39,7 +57,7 @@ struct TMDBAPIClientTests {
         )
 
         await #expect {
-            let _: Probe = try await client.request(.nowPlaying(page: 1))
+            let _: Probe = try await client.request(TMDBEndpoint.nowPlaying(page: 1))
         } throws: { error in
             guard case APIError.transport = error else { return false }
             return true
@@ -53,7 +71,7 @@ struct TMDBAPIClientTests {
         )
 
         await #expect {
-            let _: Probe = try await client.request(.nowPlaying(page: 1))
+            let _: Probe = try await client.request(TMDBEndpoint.nowPlaying(page: 1))
         } throws: { error in
             error is CancellationError
         }
@@ -66,7 +84,7 @@ struct TMDBAPIClientTests {
         )
 
         await #expect {
-            let _: Probe = try await client.request(.nowPlaying(page: 1))
+            let _: Probe = try await client.request(TMDBEndpoint.nowPlaying(page: 1))
         } throws: { error in
             guard case APIError.decoding = error else { return false }
             return true

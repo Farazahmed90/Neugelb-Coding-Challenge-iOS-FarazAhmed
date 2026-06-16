@@ -21,6 +21,7 @@ public struct TMDBImageURLResolver: ImageURLResolving {
         case .posterThumbnail: return "w342"
         case .posterLarge: return "w780"
         case .backdrop: return "w1280"
+        case .profile: return "w185"
         }
     }
 }

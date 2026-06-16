@@ -6,6 +6,8 @@ public enum ImageKind: Sendable {
     case posterThumbnail
     case posterLarge
     case backdrop
+    /// Cast/crew headshot.
+    case profile
 }
 
 /// Resolves a provider-relative image path into an absolute URL.

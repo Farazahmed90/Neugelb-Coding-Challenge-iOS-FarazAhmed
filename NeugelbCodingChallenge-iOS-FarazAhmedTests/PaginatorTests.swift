@@ -1,7 +1,7 @@
 import Foundation
 import MoviesDomain
 import Testing
-@testable import MoviesFeature
+@testable import NeugelbCodingChallenge_iOS_FarazAhmed
 
 @MainActor
 struct PaginatorTests {

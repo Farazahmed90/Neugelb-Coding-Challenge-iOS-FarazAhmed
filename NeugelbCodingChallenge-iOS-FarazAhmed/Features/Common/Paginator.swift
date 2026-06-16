@@ -2,25 +2,24 @@ import Foundation
 import MoviesDomain
 import Observation
 
-/// Drives infinite scrolling over any paginated source: threshold-based
-/// prefetch, de-duplication of repeated items (a real TMDB quirk when the
-/// catalog shifts between page requests), overlapping-load protection,
-/// and distinct first-page vs load-more failure states.
+/// Handles infinite scrolling for any paginated source. It prefetches the next
+/// page near the end, drops duplicate items that TMDB sometimes repeats across
+/// pages, avoids overlapping loads, and tracks first-page and load-more
+/// failures separately.
 @MainActor
 @Observable
-public final class Paginator<Item: Identifiable & Hashable & Sendable> {
-    public typealias FetchPage = @Sendable (_ page: Int) async throws -> Page<Item>
+final class Paginator<Item: Identifiable & Hashable & Sendable> {
+    typealias FetchPage = @Sendable (_ page: Int) async throws -> Page<Item>
 
-    public enum State: Equatable {
+    enum State: Equatable {
         case idle
         case loadingFirst
         case failedFirst(any Error & Sendable)
         case loaded(LoadMore)
 
-        public static func == (lhs: State, rhs: State) -> Bool {
+        static func == (lhs: State, rhs: State) -> Bool {
             switch (lhs, rhs) {
-            case (.idle, .idle), (.loadingFirst, .loadingFirst),
-                 (.failedFirst, .failedFirst):
+            case (.idle, .idle), (.loadingFirst, .loadingFirst), (.failedFirst, .failedFirst):
                 return true
             case (.loaded(let lhsMore), (.loaded(let rhsMore))):
                 return lhsMore == rhsMore
@@ -30,45 +29,40 @@ public final class Paginator<Item: Identifiable & Hashable & Sendable> {
         }
     }
 
-    public enum LoadMore: Equatable {
+    enum LoadMore: Equatable {
         case ready
         case loading
         case failed
         case exhausted
     }
 
-    public private(set) var items: [Item] = []
-    public private(set) var state: State = .idle
+    private(set) var items: [Item] = []
+    private(set) var state: State = .idle
 
-    /// How close to the end of the list an item must be to trigger the
-    /// next page fetch.
     private let prefetchThreshold: Int
     private let fetchPage: FetchPage
     private var nextPage = 1
     private var seenIDs = Set<Item.ID>()
 
-    public init(prefetchThreshold: Int = 5, fetchPage: @escaping FetchPage) {
+    init(prefetchThreshold: Int = 5, fetchPage: @escaping FetchPage) {
         self.prefetchThreshold = prefetchThreshold
         self.fetchPage = fetchPage
     }
 
-    /// Loads the first page if nothing is loaded yet; safe to call from
-    /// `.task` on every appearance.
-    public func loadFirstIfNeeded() async {
+    /// Safe to call from `.task` on every appearance: loads only once.
+    func loadFirstIfNeeded() async {
         guard case .idle = state else { return }
         await loadFirst()
     }
 
-    /// Loads (or retries) the first page, replacing any previous content.
-    public func loadFirst() async {
+    func loadFirst() async {
         state = .loadingFirst
         await fetchAndReplace()
     }
 
-    /// Re-fetches page one. Existing items stay visible while refreshing;
-    /// on failure they are kept so a failed pull-to-refresh never blanks
-    /// a working list.
-    public func refresh() async {
+    /// Re-fetches page one. If it fails, the current items stay so a failed
+    /// pull-to-refresh doesn't clear the list.
+    func refresh() async {
         if items.isEmpty {
             await loadFirst()
             return
@@ -76,23 +70,17 @@ public final class Paginator<Item: Identifiable & Hashable & Sendable> {
         await fetchAndReplace(keepItemsOnFailure: true)
     }
 
-    /// Triggers the next page fetch when `item` is near the end of the list.
-    public func loadMoreIfNeeded(after item: Item) async {
+    func loadMoreIfNeeded(after item: Item) async {
         guard case .loaded(.ready) = state else { return }
-        guard items.suffix(prefetchThreshold).contains(where: { $0.id == item.id }) else {
-            return
-        }
+        guard items.suffix(prefetchThreshold).contains(where: { $0.id == item.id }) else { return }
         await loadMore()
     }
 
-    /// Retries a failed load-more.
-    public func retryLoadMore() async {
+    func retryLoadMore() async {
         guard case .loaded(.failed) = state else { return }
         state = .loaded(.ready)
         await loadMore()
     }
-
-    // MARK: - Private
 
     private func fetchAndReplace(keepItemsOnFailure: Bool = false) async {
         do {
@@ -102,7 +90,7 @@ public final class Paginator<Item: Identifiable & Hashable & Sendable> {
             nextPage = 2
             state = .loaded(page.hasMore ? .ready : .exhausted)
         } catch is CancellationError {
-            // View went away mid-flight; leave state untouched.
+            // The view went away mid-load; leave the state as is.
         } catch {
             if keepItemsOnFailure, !items.isEmpty {
                 state = .loaded(.ready)
@@ -114,8 +102,8 @@ public final class Paginator<Item: Identifiable & Hashable & Sendable> {
     }
 
     private func loadMore() async {
-        // Setting the state before suspending is what makes overlapping
-        // calls (every cell appearance fires one) collapse into one fetch.
+        // Set the state before awaiting so the many calls from appearing cells
+        // collapse into one fetch.
         state = .loaded(.loading)
         do {
             let page = try await fetchPage(nextPage)
