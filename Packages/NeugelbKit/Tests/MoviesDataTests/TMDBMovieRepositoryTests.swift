@@ -58,6 +58,27 @@ struct TMDBMovieRepositoryTests {
         #expect(details.genres == [Genre(id: 18, name: "Drama"), Genre(id: 80, name: "Crime")])
     }
 
+    @Test func mapsExtendedFactsCreditsAndTrailer() async throws {
+        let repository = try makeRepository(returning: "movie_details")
+
+        let details = try await repository.movieDetails(id: 278)
+
+        // Extended facts pulled from the base response.
+        #expect(details.status == "Released")
+        #expect(details.originalLanguage == "en")
+        #expect(details.budget == 25_000_000)
+        #expect(details.revenue == 28_341_469)
+        #expect(details.productionCompanies == ["Castle Rock Entertainment"])
+
+        // Cast is ordered, capped, and the nameless entry is dropped.
+        #expect(details.cast.map(\.name) == ["Tim Robbins", "Morgan Freeman", "Bob Gunton"])
+        #expect(details.cast.first?.character == "Andy Dufresne")
+
+        // An official YouTube trailer wins over the unofficial one and the clip,
+        // and the Vimeo entry is ignored.
+        #expect(details.trailerYouTubeID == "officialTrailerKEY")
+    }
+
     @Test(arguments: [
         (401, MovieRepositoryError.unauthorized),
         (403, MovieRepositoryError.unauthorized),

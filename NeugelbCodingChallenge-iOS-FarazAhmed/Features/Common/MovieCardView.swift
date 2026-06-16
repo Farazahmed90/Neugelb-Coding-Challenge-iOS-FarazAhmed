@@ -2,7 +2,6 @@ import DesignSystem
 import MoviesDomain
 import SwiftUI
 
-/// Poster card with title, release year, and rating.
 struct MovieCardView: View {
     let movie: Movie
     let posterURL: URL?
@@ -11,25 +10,36 @@ struct MovieCardView: View {
         VStack(alignment: .leading, spacing: 8) {
             RemoteImage(url: posterURL)
                 .aspectRatio(2 / 3, contentMode: .fit)
-                .clipShape(.rect(cornerRadius: 16))
+                .overlay(alignment: .bottom) {
+                    // Scrim only behind the year chip so posters stay vivid.
+                    if releaseYear != nil {
+                        LinearGradient(
+                            colors: [.clear, .black.opacity(0.55)],
+                            startPoint: .center,
+                            endPoint: .bottom
+                        )
+                    }
+                }
                 .overlay(alignment: .topTrailing) {
                     if movie.voteCount > 0 {
                         RatingBadge(voteAverage: movie.voteAverage)
                             .padding(8)
                     }
                 }
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(movie.title)
-                    .font(.subheadline.weight(.semibold))
-                    .lineLimit(2, reservesSpace: true)
-                    .multilineTextAlignment(.leading)
-                if let year = releaseYear {
-                    Text(year)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                .overlay(alignment: .bottomLeading) {
+                    if let year = releaseYear {
+                        Text(year)
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(.white)
+                            .padding(8)
+                    }
                 }
-            }
+                .clipShape(.rect(cornerRadius: 16))
+
+            Text(movie.title)
+                .font(.subheadline.weight(.semibold))
+                .lineLimit(2, reservesSpace: true)
+                .multilineTextAlignment(.leading)
         }
         .contentShape(.rect)
         .accessibilityElement(children: .ignore)
@@ -49,12 +59,11 @@ struct MovieCardView: View {
         }
         if movie.voteCount > 0 {
             let rating = movie.voteAverage.formatted(.number.precision(.fractionLength(1)))
-            parts.append(String(localized: "Rated \(rating) out of 10", bundle: .module))
+            parts.append(String(localized: "Rated \(rating) out of 10"))
         }
         return Text(parts.joined(separator: ", "))
     }
 
-    /// Redacted shimmer stand-in shown while the first page loads.
     static var skeleton: some View {
         MovieCardView(
             movie: Movie(

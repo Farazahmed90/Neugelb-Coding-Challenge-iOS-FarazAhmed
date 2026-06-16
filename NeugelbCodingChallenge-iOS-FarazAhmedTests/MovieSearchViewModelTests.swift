@@ -1,7 +1,7 @@
 import Foundation
 import MoviesDomain
 import Testing
-@testable import MoviesFeature
+@testable import NeugelbCodingChallenge_iOS_FarazAhmed
 
 @MainActor
 struct MovieSearchViewModelTests {
@@ -267,8 +267,8 @@ struct MovieSearchViewModelTests {
         viewModel?.query = "batman"
         viewModel = nil
 
-        // The debounce task holds self weakly, so the model must die even
-        // with a search pending.
+        // The debounce task holds self weakly, so the model can deallocate
+        // even with a search pending.
         #expect(weakViewModel == nil)
     }
 }
