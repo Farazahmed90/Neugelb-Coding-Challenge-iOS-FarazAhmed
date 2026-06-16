@@ -15,9 +15,8 @@ public struct RemoteImage: View {
     }
 
     public var body: some View {
-        // The image lives in an overlay because scaledToFill reports its
-        // oversized covering size as layout size; an overlay keeps this
-        // view exactly the size its container proposes, on any device.
+        // Put the image in an overlay so scaledToFill doesn't grow the layout:
+        // the view stays exactly the size its container offers.
         Color.clear
             .overlay {
                 if let loadedImage {

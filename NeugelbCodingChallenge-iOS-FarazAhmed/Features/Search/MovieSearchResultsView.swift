@@ -1,20 +1,19 @@
 import DesignSystem
 import SwiftUI
 
-/// Search phases: typing hint, skeleton while searching, live results
-/// grid (the autocomplete), no-results, and failure with retry.
 struct MovieSearchResultsView: View {
+    @Environment(AppRouter.self) private var router
     let viewModel: MovieSearchViewModel
 
     var body: some View {
         ZStack {
-            // Skeleton, results, and empty states hand off with the same
-            // blur-to-sharp language as the cards.
             phaseContent
                 .id(viewModel.phase)
-                .transition(.blurReplace)
+                // Fade between phases (idle, skeleton, results) instead of a
+                // harder swap.
+                .transition(.opacity)
         }
-        .animation(.smooth(duration: 0.35), value: viewModel.phase)
+        .animation(.smooth(duration: 0.3), value: viewModel.phase)
     }
 
     @ViewBuilder
@@ -23,20 +22,17 @@ struct MovieSearchResultsView: View {
         case .idle:
             ContentUnavailableView {
                 Label {
-                    Text("Search movies", bundle: .module)
+                    Text("Search movies")
                 } icon: {
                     Image(systemName: "magnifyingglass")
                 }
             } description: {
-                Text("Type at least two characters to search.", bundle: .module)
+                Text(L10n.Search.minCharacters)
             }
         case .searching:
             MovieSkeletonGrid()
         case .failed(let message):
-            ErrorStateView(
-                message: message,
-                retryTitle: String(localized: "Try Again", bundle: .module)
-            ) {
+            ErrorStateView(message: message, retryTitle: String(localized: "Try Again")) {
                 viewModel.retry()
             }
         case .loaded where viewModel.results.isEmpty:
@@ -46,11 +42,20 @@ struct MovieSearchResultsView: View {
                 MovieGridView(
                     paginator: paginator,
                     posterURL: viewModel.posterURL,
+                    onSelect: { router.navigate(to: .movieDetail($0)) },
                     accessibilityIdentifier: "search.results_grid",
                     onScrollStarted: { viewModel.dismissSuggestions() }
                 )
                 .opacity(viewModel.isRefreshing ? 0.55 : 1)
                 .animation(.easeInOut(duration: 0.3), value: viewModel.isRefreshing)
+                // Hide the suggestions on the first drag, together with the
+                // keyboard. The scroll-phase callback alone reacts one drag late
+                // because the keyboard dismissal eats the first one.
+                .simultaneousGesture(
+                    DragGesture(minimumDistance: 10).onChanged { _ in
+                        viewModel.dismissSuggestions()
+                    }
+                )
             }
         }
     }

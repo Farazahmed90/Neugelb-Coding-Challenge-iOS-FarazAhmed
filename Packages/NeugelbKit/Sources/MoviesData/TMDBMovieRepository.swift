@@ -11,14 +11,14 @@ public struct TMDBMovieRepository: MovieRepository {
 
     public func latestMovies(page: Int) async throws -> Page<Movie> {
         try await mappingErrors {
-            let dto: PageDTO<MovieDTO> = try await client.request(.nowPlaying(page: page))
+            let dto: PageDTO<MovieDTO> = try await client.request(TMDBEndpoint.nowPlaying(page: page))
             return dto.toDomain()
         }
     }
 
     public func movieDetails(id: Movie.ID) async throws -> MovieDetails {
         try await mappingErrors {
-            let dto: MovieDetailsDTO = try await client.request(.movieDetails(id: id))
+            let dto: MovieDetailsDTO = try await client.request(TMDBEndpoint.movieDetails(id: id))
             return dto.toDomain()
         }
     }
@@ -26,7 +26,7 @@ public struct TMDBMovieRepository: MovieRepository {
     public func searchMovies(matching query: String, page: Int) async throws -> Page<Movie> {
         try await mappingErrors {
             let dto: PageDTO<MovieDTO> = try await client.request(
-                .searchMovies(query: query, page: page)
+                TMDBEndpoint.searchMovies(query: query, page: page)
             )
             return dto.toDomain()
         }

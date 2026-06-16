@@ -1,6 +1,5 @@
 import MoviesData
 import MoviesDomain
-import MoviesFeature
 import SwiftUI
 
 struct RootView: View {
@@ -8,6 +7,7 @@ struct RootView: View {
 
     @State private var movieListViewModel: MovieListViewModel
     @State private var searchViewModel: MovieSearchViewModel
+    @State private var router = AppRouter()
 
     init(dependencies: AppDependencies) {
         self.dependencies = dependencies
@@ -28,18 +28,23 @@ struct RootView: View {
     @State private var needsToken = false
 
     var body: some View {
-        NavigationStack {
+        @Bindable var router = router
+        NavigationStack(path: $router.path) {
             MovieListScreen(viewModel: movieListViewModel, searchViewModel: searchViewModel)
-                .navigationDestination(for: Movie.self) { movie in
-                    MovieDetailScreen(
-                        viewModel: MovieDetailViewModel(
-                            movie: movie,
-                            repository: dependencies.movieRepository,
-                            imageURLResolver: dependencies.imageURLResolver
+                .navigationDestination(for: Route.self) { route in
+                    switch route {
+                    case .movieDetail(let movie):
+                        MovieDetailScreen(
+                            viewModel: MovieDetailViewModel(
+                                movie: movie,
+                                repository: dependencies.movieRepository,
+                                imageURLResolver: dependencies.imageURLResolver
+                            )
                         )
-                    )
+                    }
                 }
         }
+        .environment(router)
         .environment(\.imageLoader, dependencies.imageLoader)
         .task {
             needsToken = await !dependencies.tokenProvider.hasToken()

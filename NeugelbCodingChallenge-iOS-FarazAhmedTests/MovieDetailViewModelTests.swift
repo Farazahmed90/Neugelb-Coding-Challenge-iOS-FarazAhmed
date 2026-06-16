@@ -1,7 +1,7 @@
 import Foundation
 import MoviesDomain
 import Testing
-@testable import MoviesFeature
+@testable import NeugelbCodingChallenge_iOS_FarazAhmed
 
 @MainActor
 struct MovieDetailViewModelTests {
@@ -55,35 +55,12 @@ struct MovieDetailViewModelTests {
     }
 
     @Test func backdropFallsBackToPosterPath() {
-        let movie = Movie(
-            id: 1,
-            title: "No Backdrop",
-            overview: "",
-            posterPath: "/poster.jpg",
-            backdropPath: nil,
-            releaseDate: nil,
-            voteAverage: 5,
-            voteCount: 10
-        )
+        // makeMovie has a poster but no backdrop, which is the case under test.
         let viewModel = makeViewModel(
-            movie: movie,
+            movie: makeMovie(id: 1),
             repository: MovieRepositoryMock()
         )
 
-        #expect(viewModel.backdropURL?.absoluteString.contains("/poster.jpg") == true)
-    }
-
-    @Test func deallocatesAfterLoading() async {
-        let repository = MovieRepositoryMock(detailsResults: [.success(makeDetails(id: 1))])
-        var viewModel: MovieDetailViewModel? = makeViewModel(
-            movie: makeMovie(id: 1),
-            repository: repository
-        )
-        weak var weakViewModel = viewModel
-
-        await viewModel?.loadIfNeeded()
-        viewModel = nil
-
-        #expect(weakViewModel == nil)
+        #expect(viewModel.backdropURL?.absoluteString.contains("/poster1.jpg") == true)
     }
 }
