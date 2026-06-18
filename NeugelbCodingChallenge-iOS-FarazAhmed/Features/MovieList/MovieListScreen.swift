@@ -31,7 +31,7 @@ struct MovieListScreen: View {
         }
         // Calm slide-up for the suggestions panel, no bounce.
         .animation(.smooth(duration: 0.45), value: searchViewModel.suggestions)
-        .searchable(text: $searchViewModel.query, prompt: Text("Search movies"))
+        .searchable(text: $searchViewModel.query, prompt: Text(L10n.Search.prompt))
         .onSubmit(of: .search) { searchViewModel.submit() }
         .task { await viewModel.paginator.loadFirstIfNeeded() }
     }
@@ -44,7 +44,7 @@ struct MovieListScreen: View {
         case .failedFirst:
             ErrorStateView(
                 message: viewModel.errorMessage(for: viewModel.paginator.state),
-                retryTitle: String(localized: "Try Again")
+                retryTitle: String(localized: L10n.Common.tryAgain)
             ) {
                 await viewModel.paginator.loadFirst()
             }

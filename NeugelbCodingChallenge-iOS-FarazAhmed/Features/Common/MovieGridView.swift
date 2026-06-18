@@ -99,16 +99,16 @@ struct MovieGridView<Header: View>: View {
             case .loading, .ready:
                 ProgressView()
                     .padding(.vertical, 24)
-                    .accessibilityLabel(Text("Loading more movies"))
+                    .accessibilityLabel(Text(L10n.Grid.loadingMore))
             case .failed:
                 VStack(spacing: 8) {
-                    Text("Couldn't load more movies.")
+                    Text(L10n.Grid.loadMoreFailed)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                     Button {
                         Task { await paginator.retryLoadMore() }
                     } label: {
-                        Text("Try Again")
+                        Text(L10n.Common.tryAgain)
                     }
                     .buttonStyle(.bordered)
                     .accessibilityIdentifier("movie_list.retry_more_button")
@@ -133,7 +133,7 @@ struct MovieSkeletonGrid: View {
         }
         .scrollDisabled(true)
         .accessibilityIdentifier("movie_list.skeleton")
-        .accessibilityLabel(Text("Loading movies"))
+        .accessibilityLabel(Text(L10n.Grid.loading))
     }
 }
 

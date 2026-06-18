@@ -22,7 +22,7 @@ struct MovieSearchResultsView: View {
         case .idle:
             ContentUnavailableView {
                 Label {
-                    Text("Search movies")
+                    Text(L10n.Search.prompt)
                 } icon: {
                     Image(systemName: "magnifyingglass")
                 }
@@ -32,7 +32,7 @@ struct MovieSearchResultsView: View {
         case .searching:
             MovieSkeletonGrid()
         case .failed(let message):
-            ErrorStateView(message: message, retryTitle: String(localized: "Try Again")) {
+            ErrorStateView(message: message, retryTitle: String(localized: L10n.Common.tryAgain)) {
                 viewModel.retry()
             }
         case .loaded where viewModel.results.isEmpty:

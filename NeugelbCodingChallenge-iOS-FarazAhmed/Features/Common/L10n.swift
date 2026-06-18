@@ -1,13 +1,35 @@
 import Foundation
 
-/// Typed, symbolic localization keys for screen-owned strings.
-///
-/// Symbolic keys (`movie_list.title`) decouple the lookup key from the English
-/// copy, so rewording the source text never orphans existing translations, and
-/// call sites get autocomplete + compile-time safety. Strings shared across
-/// several screens (e.g. "Try Again", "Search movies") deliberately stay
-/// source-as-key in the catalog rather than living under one screen's namespace.
+/// Typed, symbolic localization keys. Keeps the lookup key separate from the
+/// English copy, so rewording source text doesn't orphan translations, and call
+/// sites get autocomplete + compile-time safety.
 enum L10n {
+    enum Common {
+        static let tryAgain = LocalizedStringResource(
+            "common.try_again",
+            defaultValue: "Try Again",
+            comment: "Button title for the retry action."
+        )
+    }
+
+    enum Grid {
+        static let loading = LocalizedStringResource(
+            "grid.loading",
+            defaultValue: "Loading movies",
+            comment: "Accessibility label for the loading skeleton grid."
+        )
+        static let loadingMore = LocalizedStringResource(
+            "grid.loading_more",
+            defaultValue: "Loading more movies",
+            comment: "Accessibility label while the next page loads."
+        )
+        static let loadMoreFailed = LocalizedStringResource(
+            "grid.load_more_failed",
+            defaultValue: "Couldn't load more movies.",
+            comment: "Shown when loading the next page fails."
+        )
+    }
+
     enum MovieList {
         static let title = LocalizedStringResource(
             "movie_list.title",
@@ -100,6 +122,11 @@ enum L10n {
     }
 
     enum Search {
+        static let prompt = LocalizedStringResource(
+            "search.prompt",
+            defaultValue: "Search movies",
+            comment: "Placeholder in the search field."
+        )
         static let suggestionsLabel = LocalizedStringResource(
             "search.suggestions_label",
             defaultValue: "Search suggestions",
