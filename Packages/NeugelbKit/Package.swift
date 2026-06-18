@@ -11,6 +11,9 @@ let package = Package(
         .library(name: "MoviesDomain", targets: ["MoviesDomain"]),
         .library(name: "MoviesData", targets: ["MoviesData"]),
         .library(name: "DesignSystem", targets: ["DesignSystem"]),
+        // Shared test factories and mocks, used by the package tests and the
+        // app's test target so doubles are defined once.
+        .library(name: "TestSupport", targets: ["TestSupport"]),
     ],
     targets: [
         .target(name: "MoviesDomain"),
@@ -22,10 +25,17 @@ let package = Package(
             name: "DesignSystem",
             resources: [.process("Resources")]
         ),
-        .testTarget(name: "MoviesDomainTests", dependencies: ["MoviesDomain"]),
+        .target(
+            name: "TestSupport",
+            dependencies: ["MoviesDomain", "MoviesData"]
+        ),
+        .testTarget(
+            name: "MoviesDomainTests",
+            dependencies: ["MoviesDomain", "TestSupport"]
+        ),
         .testTarget(
             name: "MoviesDataTests",
-            dependencies: ["MoviesData"],
+            dependencies: ["MoviesData", "TestSupport"],
             resources: [.copy("Fixtures")]
         ),
     ]
