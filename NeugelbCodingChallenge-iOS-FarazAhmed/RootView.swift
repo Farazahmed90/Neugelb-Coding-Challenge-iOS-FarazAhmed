@@ -1,9 +1,10 @@
+import DesignSystem
 import MoviesData
 import MoviesDomain
 import SwiftUI
 
 struct RootView: View {
-    let dependencies: AppDependencies
+    private let dependencies: AppDependencies
 
     @State private var movieListViewModel: MovieListViewModel
     @State private var searchViewModel: MovieSearchViewModel
@@ -49,11 +50,16 @@ struct RootView: View {
         .task {
             needsToken = await !dependencies.tokenProvider.hasToken()
         }
+        .onChange(of: movieListViewModel.isUnauthorized) { _, rejected in
+            // A stored-but-invalid token surfaces here; re-prompt so it can be replaced.
+            if rejected { needsToken = true }
+        }
         .sheet(isPresented: $needsToken) {
             TokenEntryView { token in
                 try? await dependencies.tokenProvider.update(token: token)
-                needsToken = false
                 await movieListViewModel.paginator.loadFirst()
+                // Keep prompting if the new token is also rejected.
+                needsToken = movieListViewModel.isUnauthorized
             }
         }
     }

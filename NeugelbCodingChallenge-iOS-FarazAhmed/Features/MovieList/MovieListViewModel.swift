@@ -38,4 +38,11 @@ final class MovieListViewModel {
         guard case .failedFirst(let error) = state else { return ErrorMessage.generic }
         return ErrorMessage.message(for: error)
     }
+
+    /// True when the first-page load failed because TMDB rejected the token,
+    /// so the app can re-prompt for a valid one.
+    var isUnauthorized: Bool {
+        guard case .failedFirst(let error) = paginator.state else { return false }
+        return (error as? MovieRepositoryError) == .unauthorized
+    }
 }
