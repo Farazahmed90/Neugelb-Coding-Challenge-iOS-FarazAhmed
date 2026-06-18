@@ -9,7 +9,7 @@ public protocol SecretStore: Sendable {
     func delete(_ key: String) throws
 }
 
-public enum SecretStoreError: Error {
+enum SecretStoreError: Error {
     case unexpectedStatus(OSStatus)
     case invalidData
 }

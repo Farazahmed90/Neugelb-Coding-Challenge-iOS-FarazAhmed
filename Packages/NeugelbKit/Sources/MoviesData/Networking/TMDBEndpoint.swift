@@ -11,14 +11,14 @@ import Foundation
 ///
 /// Cross-cutting concerns (bearer auth, `language`) are injected by
 /// `TMDBAPIClient`, not encoded here.
-public enum TMDBEndpoint: Equatable, Sendable {
+enum TMDBEndpoint: Equatable, Sendable {
     case nowPlaying(page: Int)
     case movieDetails(id: Int)
     case searchMovies(query: String, page: Int)
 }
 
 extension TMDBEndpoint: Endpoint {
-    public var path: String {
+    var path: String {
         switch self {
         case .nowPlaying:
             return "movie/now_playing"
@@ -29,7 +29,7 @@ extension TMDBEndpoint: Endpoint {
         }
     }
 
-    public var queryItems: [URLQueryItem] {
+    var queryItems: [URLQueryItem] {
         switch self {
         case .nowPlaying(let page):
             return [URLQueryItem(name: "page", value: String(page))]

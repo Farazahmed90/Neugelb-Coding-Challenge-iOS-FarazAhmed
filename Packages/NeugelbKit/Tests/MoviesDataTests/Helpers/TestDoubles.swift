@@ -1,5 +1,5 @@
 import Foundation
-import MoviesData
+@testable import MoviesData
 
 // MARK: - HTTP transport
 

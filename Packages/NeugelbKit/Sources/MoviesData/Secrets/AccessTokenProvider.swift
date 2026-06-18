@@ -15,7 +15,7 @@ public protocol AccessTokenProviding: Sendable {
 /// Note: any client-side secret is extractable from a device; the Keychain
 /// protects it at rest, but the production-grade answer is a backend proxy.
 public actor TMDBAccessTokenProvider: AccessTokenProviding {
-    public static let keychainKey = "tmdb.api.read-access-token"
+    static let keychainKey = "tmdb.api.read-access-token"
 
     private let store: any SecretStore
     private let bundledToken: @Sendable () -> String?

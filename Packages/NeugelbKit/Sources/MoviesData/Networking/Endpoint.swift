@@ -2,17 +2,17 @@ import Foundation
 
 /// A request body together with the `Content-Type` it should be sent as.
 /// The builder sets the header automatically so call sites never forget it.
-public struct HTTPBody: Sendable {
-    public let data: Data
-    public let contentType: String
+struct HTTPBody: Sendable {
+    let data: Data
+    let contentType: String
 
-    public init(data: Data, contentType: String) {
+    init(data: Data, contentType: String) {
         self.data = data
         self.contentType = contentType
     }
 
     /// JSON-encodes any `Encodable` payload (`Content-Type: application/json`).
-    public static func json(
+    static func json(
         _ value: some Encodable,
         encoder: JSONEncoder = JSONEncoder()
     ) throws -> HTTPBody {
@@ -20,7 +20,7 @@ public struct HTTPBody: Sendable {
     }
 
     /// Raw bytes with a caller-supplied content type (form data, protobuf, …).
-    public static func raw(_ data: Data, contentType: String) -> HTTPBody {
+    static func raw(_ data: Data, contentType: String) -> HTTPBody {
         HTTPBody(data: data, contentType: contentType)
     }
 }
@@ -30,7 +30,7 @@ public struct HTTPBody: Sendable {
 /// endpoints stay a one-line `path`, while POST/PUT/PATCH endpoints just
 /// override the pieces they need. Auth and other cross-cutting concerns are
 /// injected by the client, not baked into the endpoint.
-public protocol Endpoint: Sendable {
+protocol Endpoint: Sendable {
     var path: String { get }
     var method: HTTPMethod { get }
     var queryItems: [URLQueryItem] { get }
@@ -38,7 +38,7 @@ public protocol Endpoint: Sendable {
     var body: HTTPBody? { get }
 }
 
-public extension Endpoint {
+extension Endpoint {
     var method: HTTPMethod { .get }
     var queryItems: [URLQueryItem] { [] }
     var headers: [String: String] { [:] }
