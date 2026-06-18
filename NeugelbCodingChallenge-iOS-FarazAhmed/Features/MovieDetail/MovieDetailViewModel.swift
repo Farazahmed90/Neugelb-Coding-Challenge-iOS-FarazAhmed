@@ -25,7 +25,6 @@ final class MovieDetailViewModel {
         imageURLResolver.imageURL(forPath: movie.posterPath, kind: .posterLarge)
     }
 
-    /// The loaded details, if available.
     var details: MovieDetails? {
         if case .loaded(let details) = state { return details }
         return nil
@@ -38,7 +37,7 @@ final class MovieDetailViewModel {
     /// Deep link to the trailer on YouTube, when one is available.
     var trailerURL: URL? {
         guard let id = details?.trailerYouTubeID else { return nil }
-        return URL(string: "https://www.youtube.com/watch?v=\(id)")
+        return YouTube.watchURL(videoID: id)
     }
 
     init(movie: Movie, repository: any MovieRepository, imageURLResolver: any ImageURLResolving) {
