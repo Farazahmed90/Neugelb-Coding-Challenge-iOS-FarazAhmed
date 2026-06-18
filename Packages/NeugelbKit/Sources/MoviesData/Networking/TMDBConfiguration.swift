@@ -1,7 +1,6 @@
 import Foundation
 
-/// Environment for the TMDB API. Centralizes the base URLs and the
-/// content language so they are injected, never hard-coded at call sites.
+/// Environment for the TMDB API: base URLs and the content language sent with each request.
 public struct TMDBConfiguration: Sendable {
     public let apiBaseURL: URL
     public let imageBaseURL: URL
