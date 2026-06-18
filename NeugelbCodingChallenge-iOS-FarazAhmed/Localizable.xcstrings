@@ -36,11 +36,16 @@
     },
     "movie_detail.cast_section" : {
       "comment" : "Header above the cast carousel.",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Besetzung"
+          }
+        },
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Cast"
           }
         }
@@ -48,11 +53,16 @@
     },
     "movie_detail.details_section" : {
       "comment" : "Header above the facts grid.",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Details"
+          }
+        },
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Details"
           }
         }
@@ -60,11 +70,16 @@
     },
     "movie_detail.fact_budget" : {
       "comment" : "Facts grid label: budget.",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Budget"
+          }
+        },
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Budget"
           }
         }
@@ -72,11 +87,16 @@
     },
     "movie_detail.fact_language" : {
       "comment" : "Facts grid label: original language.",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Originalsprache"
+          }
+        },
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Original Language"
           }
         }
@@ -84,11 +104,16 @@
     },
     "movie_detail.fact_release_date" : {
       "comment" : "Facts grid label: release date.",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erscheinungsdatum"
+          }
+        },
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Release Date"
           }
         }
@@ -96,11 +121,16 @@
     },
     "movie_detail.fact_revenue" : {
       "comment" : "Facts grid label: revenue.",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einspielergebnis"
+          }
+        },
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Revenue"
           }
         }
@@ -108,11 +138,16 @@
     },
     "movie_detail.fact_runtime" : {
       "comment" : "Facts grid label: runtime.",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laufzeit"
+          }
+        },
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Runtime"
           }
         }
@@ -120,11 +155,16 @@
     },
     "movie_detail.fact_status" : {
       "comment" : "Facts grid label: release status.",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Status"
+          }
+        },
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Status"
           }
         }
@@ -132,11 +172,16 @@
     },
     "movie_detail.fact_studio" : {
       "comment" : "Facts grid label: production companies.",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Studio"
+          }
+        },
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Studio"
           }
         }
@@ -178,11 +223,16 @@
     },
     "movie_detail.show_less" : {
       "comment" : "Collapses the expanded overview.",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weniger"
+          }
+        },
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Less"
           }
         }
@@ -190,11 +240,16 @@
     },
     "movie_detail.show_more" : {
       "comment" : "Expands the truncated overview.",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mehr"
+          }
+        },
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "More"
           }
         }
@@ -202,11 +257,16 @@
     },
     "movie_detail.watch_trailer" : {
       "comment" : "Button that opens the movie trailer.",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trailer ansehen"
+          }
+        },
         "en" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Watch Trailer"
           }
         }
