@@ -58,16 +58,17 @@ struct MovieListScreen: View {
             MovieGridView(
                 paginator: viewModel.paginator,
                 posterURL: viewModel.posterURL,
-                onSelect: { router.navigate(to: .movieDetail($0)) }
-            ) {
-                if !viewModel.featured.isEmpty {
-                    FeaturedCarousel(
-                        movies: viewModel.featured,
-                        backdropURL: viewModel.backdropURL,
-                        onSelect: { router.navigate(to: .movieDetail($0)) }
-                    )
+                onSelect: { router.navigate(to: .movieDetail($0)) },
+                header: {
+                    if !viewModel.featured.isEmpty {
+                        FeaturedCarousel(
+                            movies: viewModel.featured,
+                            backdropURL: viewModel.backdropURL,
+                            onSelect: { router.navigate(to: .movieDetail($0)) }
+                        )
+                    }
                 }
-            }
+            )
             .refreshable { await viewModel.paginator.refresh() }
         }
     }

@@ -4,7 +4,7 @@ import SwiftUI
 
 /// Shared column layout. Kept separate from the generic `MovieGridView` so the
 /// skeleton can use it without naming a header type.
-enum MovieGridLayout {
+private enum MovieGridLayout {
     static let columns = [GridItem(.adaptive(minimum: 150, maximum: 220), spacing: 16)]
 }
 
@@ -12,11 +12,11 @@ enum MovieGridLayout {
 /// shows a load-more footer. Used by the list and search screens. An optional
 /// `header` scrolls above the grid (e.g. the featured carousel).
 struct MovieGridView<Header: View>: View {
-    let paginator: Paginator<Movie>
-    let posterURL: (Movie) -> URL?
-    let onSelect: (Movie) -> Void
-    var accessibilityIdentifier = "movie_list.grid"
-    var onScrollStarted: (() -> Void)?
+    private let paginator: Paginator<Movie>
+    private let posterURL: (Movie) -> URL?
+    private let onSelect: (Movie) -> Void
+    private var accessibilityIdentifier = "movie_list.grid"
+    private var onScrollStarted: (() -> Void)?
     private let header: Header
 
     init(
@@ -42,23 +42,7 @@ struct MovieGridView<Header: View>: View {
         ScrollView {
             VStack(spacing: 0) {
                 header
-
-                LazyVGrid(columns: MovieGridLayout.columns, spacing: 20) {
-                    ForEach(Array(paginator.items.enumerated()), id: \.element.id) { index, movie in
-                        Button {
-                            onSelect(movie)
-                        } label: {
-                            MovieCardView(movie: movie, posterURL: posterURL(movie))
-                        }
-                        .buttonStyle(.plain)
-                        // Blur-to-sharp dissolve; a plain fade under Reduce Motion.
-                        .transition(reduceMotion ? .opacity : AnyTransition(.blurReplace))
-                        .animation(itemAnimation(forIndex: index), value: paginator.items)
-                        .task { await paginator.loadMoreIfNeeded(after: movie) }
-                    }
-                }
-                .padding(.horizontal)
-
+                grid
                 footer
             }
         }
@@ -76,6 +60,24 @@ struct MovieGridView<Header: View>: View {
                 scrollPosition.scrollTo(edge: .top)
             }
         }
+    }
+
+    private var grid: some View {
+        LazyVGrid(columns: MovieGridLayout.columns, spacing: 20) {
+            ForEach(Array(paginator.items.enumerated()), id: \.element.id) { index, movie in
+                Button {
+                    onSelect(movie)
+                } label: {
+                    MovieCardView(movie: movie, posterURL: posterURL(movie))
+                }
+                .buttonStyle(.plain)
+                // Blur-to-sharp dissolve; a plain fade under Reduce Motion.
+                .transition(reduceMotion ? .opacity : AnyTransition(.blurReplace))
+                .animation(itemAnimation(forIndex: index), value: paginator.items)
+                .task { await paginator.loadMoreIfNeeded(after: movie) }
+            }
+        }
+        .padding(.horizontal)
     }
 
     /// Each card animates in slightly after the one before it, for a staggered
@@ -134,3 +136,21 @@ struct MovieSkeletonGrid: View {
         .accessibilityLabel(Text("Loading movies"))
     }
 }
+
+#if DEBUG
+#Preview("Grid") {
+    @Previewable @State var paginator = Paginator<Movie> { page in
+        try await PreviewMovieRepository().latestMovies(page: page)
+    }
+    MovieGridView(
+        paginator: paginator,
+        posterURL: { _ in nil },
+        onSelect: { _ in }
+    )
+    .task { await paginator.loadFirstIfNeeded() }
+}
+
+#Preview("Skeleton") {
+    MovieSkeletonGrid()
+}
+#endif

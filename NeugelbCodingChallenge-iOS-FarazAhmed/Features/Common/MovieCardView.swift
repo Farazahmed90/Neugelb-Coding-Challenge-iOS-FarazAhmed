@@ -8,33 +8,7 @@ struct MovieCardView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            RemoteImage(url: posterURL)
-                .aspectRatio(2 / 3, contentMode: .fit)
-                .overlay(alignment: .bottom) {
-                    // Scrim only behind the year chip so posters stay vivid.
-                    if releaseYear != nil {
-                        LinearGradient(
-                            colors: [.clear, .black.opacity(0.55)],
-                            startPoint: .center,
-                            endPoint: .bottom
-                        )
-                    }
-                }
-                .overlay(alignment: .topTrailing) {
-                    if movie.voteCount > 0 {
-                        RatingBadge(voteAverage: movie.voteAverage)
-                            .padding(8)
-                    }
-                }
-                .overlay(alignment: .bottomLeading) {
-                    if let year = releaseYear {
-                        Text(year)
-                            .font(.caption2.weight(.semibold))
-                            .foregroundStyle(.white)
-                            .padding(8)
-                    }
-                }
-                .clipShape(.rect(cornerRadius: 16))
+            poster
 
             Text(movie.title)
                 .font(.subheadline.weight(.semibold))
@@ -46,6 +20,36 @@ struct MovieCardView: View {
         .accessibilityLabel(Text(movie.title))
         .accessibilityValue(accessibilityDetails)
         .accessibilityIdentifier("movie_list.card.\(movie.id)")
+    }
+
+    private var poster: some View {
+        RemoteImage(url: posterURL)
+            .aspectRatio(2 / 3, contentMode: .fit)
+            .overlay(alignment: .bottom) {
+                // Scrim only behind the year chip so posters stay vivid.
+                if releaseYear != nil {
+                    LinearGradient(
+                        colors: [.clear, .black.opacity(0.55)],
+                        startPoint: .center,
+                        endPoint: .bottom
+                    )
+                }
+            }
+            .overlay(alignment: .topTrailing) {
+                if movie.voteCount > 0 {
+                    RatingBadge(voteAverage: movie.voteAverage)
+                        .padding(8)
+                }
+            }
+            .overlay(alignment: .bottomLeading) {
+                if let year = releaseYear {
+                    Text(year)
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.white)
+                        .padding(8)
+                }
+            }
+            .clipShape(.rect(cornerRadius: 16))
     }
 
     private var releaseYear: String? {
@@ -83,3 +87,17 @@ struct MovieCardView: View {
         .accessibilityHidden(true)
     }
 }
+
+#if DEBUG
+#Preview("Card") {
+    MovieCardView(movie: PreviewData.movies[0], posterURL: nil)
+        .frame(width: 180)
+        .padding()
+}
+
+#Preview("Skeleton") {
+    MovieCardView.skeleton
+        .frame(width: 180)
+        .padding()
+}
+#endif
