@@ -5,13 +5,16 @@ import SwiftUI
 
 struct RootView: View {
     private let dependencies: AppDependencies
+    /// False while the launch splash is up, so the token sheet waits for it.
+    private let isActive: Bool
 
     @State private var movieListViewModel: MovieListViewModel
     @State private var searchViewModel: MovieSearchViewModel
     @State private var router = AppRouter()
 
-    init(dependencies: AppDependencies) {
+    init(dependencies: AppDependencies, isActive: Bool = true) {
         self.dependencies = dependencies
+        self.isActive = isActive
         _movieListViewModel = State(
             initialValue: MovieListViewModel(
                 repository: dependencies.movieRepository,
@@ -54,7 +57,7 @@ struct RootView: View {
             // A stored-but-invalid token surfaces here; re-prompt so it can be replaced.
             if rejected { needsToken = true }
         }
-        .sheet(isPresented: $needsToken) {
+        .sheet(isPresented: Binding(get: { needsToken && isActive }, set: { needsToken = $0 })) {
             TokenEntryView { token in
                 try? await dependencies.tokenProvider.update(token: token)
                 await movieListViewModel.paginator.loadFirst()
