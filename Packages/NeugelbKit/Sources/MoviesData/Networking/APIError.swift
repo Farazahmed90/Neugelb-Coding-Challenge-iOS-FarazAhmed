@@ -1,6 +1,6 @@
 import Foundation
 
-public enum APIError: Error {
+enum APIError: Error {
     /// No access token available from Keychain or bundle seed.
     case missingCredentials
     /// The response was not an HTTP response at all.
@@ -16,7 +16,7 @@ public enum APIError: Error {
 extension APIError {
     /// True when retrying might help (connectivity issues, server errors)
     /// as opposed to permanent failures like 401/404 or decoding bugs.
-    public var isRetryable: Bool {
+    var isRetryable: Bool {
         switch self {
         case .transport:
             return true

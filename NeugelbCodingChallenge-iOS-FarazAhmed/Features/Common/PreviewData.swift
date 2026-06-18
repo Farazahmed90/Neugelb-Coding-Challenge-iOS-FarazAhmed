@@ -3,7 +3,7 @@ import Foundation
 import MoviesDomain
 
 enum PreviewData {
-    static let movies: [Movie] = [
+    nonisolated static let movies: [Movie] = [
         Movie(
             id: 278,
             title: "The Shawshank Redemption",

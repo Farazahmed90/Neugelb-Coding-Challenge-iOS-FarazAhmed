@@ -2,8 +2,6 @@ import DesignSystem
 import MoviesDomain
 import SwiftUI
 
-/// Auto-advancing hero carousel of the leading now-playing titles, shown above
-/// the poster grid. Tapping a slide opens its detail screen.
 struct FeaturedCarousel: View {
     let movies: [Movie]
     let backdropURL: (Movie) -> URL?

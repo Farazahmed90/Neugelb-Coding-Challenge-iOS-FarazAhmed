@@ -3,8 +3,7 @@ import Foundation
 import MoviesData
 import MoviesDomain
 
-/// Composition root: the only place that knows concrete implementations.
-/// Everything downstream receives protocols.
+/// Composition root — builds the concrete types and wires them together.
 struct AppDependencies {
     let movieRepository: any MovieRepository
     let imageURLResolver: any ImageURLResolving

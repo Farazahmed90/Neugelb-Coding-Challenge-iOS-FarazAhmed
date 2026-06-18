@@ -1,7 +1,7 @@
 import SwiftUI
 import UIKit
 
-public enum ImageLoadingError: Error {
+enum ImageLoadingError: Error {
     case invalidImageData
 }
 

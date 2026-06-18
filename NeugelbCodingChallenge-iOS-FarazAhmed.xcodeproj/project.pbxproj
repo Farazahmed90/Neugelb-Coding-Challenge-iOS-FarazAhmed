@@ -11,7 +11,18 @@
 		AA0000000000000000000002 /* MoviesData in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000000004 /* MoviesData */; };
 		AA0000000000000000000006 /* DesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000000008 /* DesignSystem */; };
 		BB000000000000000000000D /* MoviesDomain in Frameworks */ = {isa = PBXBuildFile; productRef = BB000000000000000000000C /* MoviesDomain */; };
+		BB000000000000000000000E /* TestSupport in Frameworks */ = {isa = PBXBuildFile; productRef = BB000000000000000000000F /* TestSupport */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		BB0000000000000000000008 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 15D2511C2FDC51920062328F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 15D251232FDC51920062328F;
+			remoteInfo = "NeugelbCodingChallenge-iOS-FarazAhmed";
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		15D251242FDC51920062328F /* NeugelbCodingChallenge-iOS-FarazAhmed.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "NeugelbCodingChallenge-iOS-FarazAhmed.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -31,16 +42,6 @@
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
-/* Begin PBXContainerItemProxy section */
-		BB0000000000000000000008 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 15D2511C2FDC51920062328F /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 15D251232FDC51920062328F;
-			remoteInfo = "NeugelbCodingChallenge-iOS-FarazAhmed";
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXFrameworksBuildPhase section */
 		15D251212FDC51920062328F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
@@ -57,6 +58,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BB000000000000000000000D /* MoviesDomain in Frameworks */,
+				BB000000000000000000000E /* TestSupport in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -128,20 +130,13 @@
 			name = "NeugelbCodingChallenge-iOS-FarazAhmedTests";
 			packageProductDependencies = (
 				BB000000000000000000000C /* MoviesDomain */,
+				BB000000000000000000000F /* TestSupport */,
 			);
 			productName = "NeugelbCodingChallenge-iOS-FarazAhmedTests";
 			productReference = BB0000000000000000000002 /* NeugelbCodingChallenge-iOS-FarazAhmedTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
-
-/* Begin PBXTargetDependency section */
-		BB0000000000000000000007 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 15D251232FDC51920062328F /* NeugelbCodingChallenge-iOS-FarazAhmed */;
-			targetProxy = BB0000000000000000000008 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin PBXProject section */
 		15D2511C2FDC51920062328F /* Project object */ = {
@@ -217,6 +212,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		BB0000000000000000000007 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 15D251232FDC51920062328F /* NeugelbCodingChallenge-iOS-FarazAhmed */;
+			targetProxy = BB0000000000000000000008 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		15D2512D2FDC51930062328F /* Debug */ = {
@@ -508,6 +511,10 @@
 		BB000000000000000000000C /* MoviesDomain */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = MoviesDomain;
+		};
+		BB000000000000000000000F /* TestSupport */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = TestSupport;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

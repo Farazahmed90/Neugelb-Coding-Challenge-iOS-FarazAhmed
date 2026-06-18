@@ -1,7 +1,6 @@
 import Foundation
 
-/// Environment for the TMDB API. Centralizes the base URLs and the
-/// content language so they are injected, never hard-coded at call sites.
+/// Environment for the TMDB API: base URLs and the content language sent with each request.
 public struct TMDBConfiguration: Sendable {
     public let apiBaseURL: URL
     public let imageBaseURL: URL
@@ -17,8 +16,8 @@ public struct TMDBConfiguration: Sendable {
 
     public static func production(locale: Locale = .current) -> TMDBConfiguration {
         TMDBConfiguration(
-            apiBaseURL: URL(string: "https://api.themoviedb.org/3")!,
-            imageBaseURL: URL(string: "https://image.tmdb.org/t/p")!,
+            apiBaseURL: TMDBEnvironment.apiBaseURL,
+            imageBaseURL: TMDBEnvironment.imageBaseURL,
             language: locale.identifier(.bcp47)
         )
     }

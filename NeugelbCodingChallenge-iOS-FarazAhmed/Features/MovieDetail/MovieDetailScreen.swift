@@ -78,7 +78,7 @@ struct MovieDetailScreen: View {
         case .loaded(let details):
             detailBody(for: details)
         case .failed(let message):
-            ErrorStateView(message: message, retryTitle: String(localized: "Try Again")) {
+            ErrorStateView(message: message, retryTitle: String(localized: L10n.Common.tryAgain)) {
                 await viewModel.retry()
             }
             .padding(.top, 24)
