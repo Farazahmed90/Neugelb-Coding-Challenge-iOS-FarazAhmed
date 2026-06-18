@@ -17,8 +17,8 @@ public struct TMDBConfiguration: Sendable {
 
     public static func production(locale: Locale = .current) -> TMDBConfiguration {
         TMDBConfiguration(
-            apiBaseURL: URL(string: "https://api.themoviedb.org/3")!,
-            imageBaseURL: URL(string: "https://image.tmdb.org/t/p")!,
+            apiBaseURL: TMDBEnvironment.apiBaseURL,
+            imageBaseURL: TMDBEnvironment.imageBaseURL,
             language: locale.identifier(.bcp47)
         )
     }
