@@ -19,6 +19,9 @@ build/
 # Secrets — never committed; see README for setup
 Secrets.plist
 
+# Local tooling config (not a deliverable)
+.claude/
+
 # Session planning notes (not a deliverable)
 PLAN.md
 

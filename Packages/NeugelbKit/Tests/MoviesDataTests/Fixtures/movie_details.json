@@ -1,0 +1,50 @@
+{
+  "adult": false,
+  "backdrop_path": "/zfbjgQE1uSd9wiPTX4VzsLi0rGG.jpg",
+  "belongs_to_collection": null,
+  "budget": 25000000,
+  "genres": [
+    { "id": 18, "name": "Drama" },
+    { "id": 80, "name": "Crime" }
+  ],
+  "homepage": "",
+  "id": 278,
+  "imdb_id": "tt0111161",
+  "origin_country": ["US"],
+  "original_language": "en",
+  "original_title": "The Shawshank Redemption",
+  "overview": "Imprisoned in the 1940s for the double murder of his wife and her lover, upstanding banker Andy Dufresne begins a new life at the Shawshank prison.",
+  "popularity": 31.9534,
+  "poster_path": "/9cqNxx0GxF0bflZmeSMuL5tnGzr.jpg",
+  "production_companies": [
+    { "id": 97, "logo_path": null, "name": "Castle Rock Entertainment", "origin_country": "US" }
+  ],
+  "release_date": "1994-09-23",
+  "revenue": 28341469,
+  "runtime": 142,
+  "spoken_languages": [
+    { "english_name": "English", "iso_639_1": "en", "name": "English" }
+  ],
+  "status": "Released",
+  "tagline": "Fear can hold you prisoner. Hope can set you free.",
+  "title": "The Shawshank Redemption",
+  "video": false,
+  "vote_average": 8.712,
+  "vote_count": 28599,
+  "credits": {
+    "cast": [
+      { "id": 504, "name": "Tim Robbins", "character": "Andy Dufresne", "profile_path": "/djLVFETFTvPyVUdrd7aLVykobof.jpg", "order": 0 },
+      { "id": 192, "name": "Morgan Freeman", "character": "Ellis Boyd 'Red' Redding", "profile_path": "/jPsLqiYGSofU4s6BjrxnefMfabb.jpg", "order": 1 },
+      { "id": 4029, "name": "", "character": "Uncredited Extra", "profile_path": null, "order": 2 },
+      { "id": 6873, "name": "Bob Gunton", "character": "Warden Norton", "profile_path": null, "order": 3 }
+    ]
+  },
+  "videos": {
+    "results": [
+      { "key": "clipONLY", "site": "YouTube", "type": "Clip", "official": true },
+      { "key": "unofficialTrailer", "site": "YouTube", "type": "Trailer", "official": false },
+      { "key": "officialTrailerKEY", "site": "YouTube", "type": "Trailer", "official": true },
+      { "key": "vimeoIgnored", "site": "Vimeo", "type": "Trailer", "official": true }
+    ]
+  }
+}
