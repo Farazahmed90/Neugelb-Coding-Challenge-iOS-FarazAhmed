@@ -1,29 +1,29 @@
 # Neugelb iOS Challenge task
 
-A SwiftUI client for [The Movie Database (TMDB)](https://www.themoviedb.org) — latest movies with infinite scroll, a detail screen, and debounced search. Built for the Neugelb iOS challenge.
+A SwiftUI client for [The Movie Database (TMDB)](https://www.themoviedb.org). It shows the latest movies with infinite scroll, a detail screen, and search with live suggestions. Built for the Neugelb iOS challenge.
 
-The brief is small enough to solve in a single view. I deliberately didn't. This codebase is structured the way I'd structure a feature in a team that has to live with it: a thin, testable domain at the core, swappable infrastructure at the edges, and exactly one place that knows how the concrete pieces fit together. The notes below explain not just *what* the structure is, but *which alternatives I rejected and why*.
+The app is small, but I've put it together the way I'd build something a team has to maintain. The domain and data layers sit behind protocols, the UI depends only on those protocols, and the concrete types are wired up in one place. The sections below cover how it fits together and the reasoning behind the main choices.
 
 - **Platform:** iOS 18+ · SwiftUI · Swift 6 (strict concurrency)
-- **Localization:** English + German · Dynamic Type · light/dark
-- **Tests:** deterministic unit tests across the app and the foundation package
+- **Localization:** English and German, Dynamic Type, light and dark
+- **Tests:** unit tests across the app and the foundation package
 
 ---
 
 ## Design goals
 
-1. **Policy independent of detail.** View models depend on protocols, never on TMDB, `URLSession`, or the Keychain. Swapping the backend or the cache touches one file.
-2. **One composition root.** Concrete types are named in exactly one place (`AppDependencies`). Everywhere else receives abstractions.
-3. **Resilience by composition.** Offline fallback, retry, and re-auth are layered as decorators, not branches scattered through the networking code.
-4. **Correct by construction under Swift 6.** Mutable shared state is actor-isolated; UI state is `@MainActor`. The compiler enforces the threading model.
+1. **The UI doesn't know about infrastructure.** View models depend on protocols, not on TMDB, `URLSession`, or the Keychain. Changing the backend or the cache is a one-file change.
+2. **One place wires things together.** Concrete types are created only in `AppDependencies`; the rest of the app works against protocols.
+3. **Resilience is built from small wrappers.** Offline fallback, retry, and re-auth are separate types rather than conditionals spread through the networking code.
+4. **Swift 6 does the concurrency checking.** Shared mutable state is actor-isolated and UI state is `@MainActor`, so the compiler enforces the threading rules.
 
 ---
 
 ## Architecture
 
-Layered MVVM. The reusable foundation — domain, data, and design-system — lives in a Swift package (`NeugelbKit`); SwiftUI views and `@Observable` view models live in the app target and build on top of it. The dependency arrows only ever point *inward* — toward the domain.
+The app uses MVVM. The reusable foundation (domain, data, and design system) lives in a Swift package, `NeugelbKit`. The SwiftUI views and `@Observable` view models live in the app target on top of it. Dependencies point inward, toward the domain.
 
-Blue nodes are `@MainActor` (UI state); amber nodes are `actor`-isolated infrastructure. Dependency arrows point inward, toward the domain.
+Blue nodes are `@MainActor` (UI state); amber nodes are `actor`-isolated infrastructure.
 
 ```mermaid
 flowchart TD
@@ -75,13 +75,13 @@ flowchart TD
 | --- | --- | --- | --- |
 | **MoviesDomain** | `NeugelbKit` | Model types (`Movie`, `MovieDetails`, `Page`) and abstractions (`MovieRepository`, `ImageURLResolving`). No Apple-framework or third-party coupling. | nothing |
 | **MoviesData** | `NeugelbKit` | TMDB networking, DTO decoding, repository implementations, offline disk cache, Keychain token storage. | MoviesDomain |
-| **DesignSystem** | `NeugelbKit` | App-agnostic UI primitives — remote images, shimmer skeletons, glass panels, rating badges. | — |
-| **Features** | App target | SwiftUI screens + `@Observable` view models, plus a shared generic `Paginator`/`MovieGridView`. | MoviesDomain, DesignSystem |
+| **DesignSystem** | `NeugelbKit` | App-agnostic UI primitives: remote images, shimmer skeletons, glass panels, rating badges. | — |
+| **Features** | App target | SwiftUI screens and `@Observable` view models, plus a shared generic `Paginator`/`MovieGridView`. | MoviesDomain, DesignSystem |
 | **Composition root** | App target | `AppDependencies` builds the concrete graph; `AppRouter` owns navigation. | MoviesData, MoviesDomain |
 
 ### Request flow
 
-The view model talks only to the `MovieRepository` protocol. What's actually behind it — a cache-backed, retrying TMDB client — is invisible to the UI.
+The view model only talks to the `MovieRepository` protocol. What sits behind it (a cache-backed, retrying TMDB client) doesn't change anything for the UI.
 
 ```mermaid
 sequenceDiagram
@@ -116,25 +116,25 @@ sequenceDiagram
 
 ## Concurrency model
 
-The app targets **Swift 6 strict concurrency**, so the threading contract is checked at compile time rather than hoped for at runtime:
+The app builds with Swift 6 strict concurrency, so the threading rules are checked by the compiler:
 
-- **UI state is `@MainActor`.** View models, `AppRouter`, and the generic `Paginator` are `@MainActor @Observable` — no manual hops back to the main thread, no data races on published state.
-- **Shared mutable infrastructure is actor-isolated.** `TMDBAccessTokenProvider` (caches and seeds the token) and `MovieListDiskCache` (the offline store) are `actor`s, so concurrent reads/writes are serialized without locks.
-- **Everything crossing a boundary is `Sendable`.** Domain models, DTOs, and protocols are `Sendable`, which is what lets the compiler prove the above.
+- **UI state is `@MainActor`.** The view models, `AppRouter`, and `Paginator` are `@MainActor @Observable`, so their state is always read and written on the main thread.
+- **Shared infrastructure is actor-isolated.** `TMDBAccessTokenProvider` (which caches and seeds the token) and `MovieListDiskCache` (the offline store) are actors, so concurrent access is serialized without manual locks.
+- **Values that cross those boundaries are `Sendable`.** Domain models, DTOs, and protocols are `Sendable`, which is what lets the compiler verify the rest.
 
-The result is a unidirectional flow — intent goes down through async calls, state comes back up through `@Observable` — with the actor boundaries doing the synchronization.
+Calls go down as async functions, and state comes back up through `@Observable`.
 
 ---
 
 ## Testing strategy
 
-Tests target the **seams**, not the screens — the risk lives in the logic (pagination, retry, token fallback, decoding), not in declarative SwiftUI layout. Because every collaborator is a protocol, the suite runs entirely in-memory: the HTTP transport is stubbed, so the networking layer is fully exercised without opening a real socket — deterministic and flake-free.
+The tests focus on logic rather than views. Pagination, retry, token fallback, and decoding are where things break, not in declarative SwiftUI. Because every dependency is a protocol, the tests run in memory with a stubbed HTTP transport, so the networking layer is covered without making real requests.
 
-End-to-end UI flows aren't unit-tested by design — XCUITest is the planned next layer, and the accessibility identifiers it needs are already in place (see *Limitations*).
+There are no end-to-end UI tests yet; that's the next step. The accessibility identifiers they would use are already in the code (see *Limitations*).
 
-- **Domain/data tests** (`NeugelbKit` package): the **TMDB networking layer** — endpoint construction, auth-header injection, HTTP error mapping, retry, and empty/bodyless responses — plus DTO decoding against JSON fixtures, token resolution (Keychain → bundled seed → prompt), and the offline-fallback decorator. Verified with a stubbed `HTTPClient` and an in-memory `SecretStore`.
-- **Feature tests** (app target): the generic `Paginator` (load-more, retry, empty/terminal states), search debounce + suggestion behavior, detail loading, and router navigation — driven by a `MovieRepositoryMock`.
-- **Shared doubles, defined once.** `TestSupport` is a library product holding the mocks/factories used by *both* surfaces, so a fake is never duplicated. Data-layer-only fakes (HTTP, secrets, fixtures) stay local to the package tests, where they belong.
+- **Domain and data tests** (`NeugelbKit` package): the TMDB networking layer (endpoint construction, auth headers, HTTP error mapping, retry, empty responses), DTO decoding against JSON fixtures, token resolution (Keychain → bundled seed → prompt), and the offline-fallback wrapper. These use a stubbed `HTTPClient` and an in-memory `SecretStore`.
+- **Feature tests** (app target): the generic `Paginator` (load-more, retry, empty and terminal states), search debounce and suggestions, detail loading, and router navigation, all driven by a `MovieRepositoryMock`.
+- **Shared doubles.** `TestSupport` holds the mocks and factories used by both test surfaces so they aren't duplicated. Fakes that only the data layer needs (HTTP, secrets, fixtures) stay with the package tests.
 
 ```sh
 make test          # everything (package + app)
@@ -142,27 +142,23 @@ make test-app      # app-target unit tests
 make test-package  # NeugelbKit package tests
 ```
 
-> The two surfaces run in separate containers (host-app target vs. SPM package) that a single `xcodebuild` invocation can't combine, so the `Makefile` is the canonical runner.
+> The two test surfaces (the app target and the SPM package) can't run in a single `xcodebuild` call, so the `Makefile` runs both.
 
 ---
 
 ## Key decisions & trade-offs
 
 **Foundation in a package, features in the app.**
-Domain, data, and design-system are reusable and independently testable, so they live in `NeugelbKit`. Feature screens stay in the app target.
-- *Alternative rejected:* one SPM module per feature. It buys enforced boundaries but taxes every change with `public` annotations, per-module resource bundles, and string-catalog fragmentation — overkill for code that isn't shared across apps. I kept the package surface small and intentional instead.
+The domain, data, and design system are reusable and easy to test on their own, so they live in `NeugelbKit`. The feature screens stay in the app target. I considered a separate SPM module per feature, but that adds `public` annotations, per-module resource bundles, and split string catalogs for code that isn't actually shared between apps, so it wasn't worth it here.
 
-**Resilience as decorators, not conditionals.**
-`OfflineFallbackMovieRepository` wraps the remote repository plus a disk cache; retry lives inside `TMDBAPIClient`.
-- *Trade-off:* a couple more small types, in exchange for networking code that has no idea caching or retry exists. Each concern is testable in isolation and composable in the one place that assembles them.
+**Resilience as wrappers.**
+`OfflineFallbackMovieRepository` wraps the remote repository and a disk cache, and retry lives inside `TMDBAPIClient`. That's a couple of extra small types, but the networking code stays unaware of caching and retry, and each piece can be tested on its own.
 
-**One generic `Paginator` for list *and* search.**
-Load-more, retry, dedup, and terminal-state logic exist once, behind `Paginator<Item>`.
-- *Trade-off:* a generic constraint (`Identifiable & Hashable & Sendable`) over copy-pasted pagination in two view models. The constraint is cheap; the duplication wouldn't have been.
+**One generic `Paginator` for the list and search.**
+Load-more, retry, dedup, and terminal-state handling live in `Paginator<Item>` instead of being copied into two view models. The cost is a generic constraint (`Identifiable & Hashable & Sendable`), which is cheaper than keeping two copies in sync.
 
-**Keychain-first token with a graceful prompt.**
-No secrets in the repo. The token resolves Keychain → optional bundled `Secrets.plist` → first-launch entry screen, and a rejected token re-prompts in place.
-- *Honest limitation:* any client-side secret is extractable from a device. The Keychain only protects it at rest. See *Limitations* — the real fix is server-side.
+**Keychain token with a prompt fallback.**
+No secrets are committed. The token resolves Keychain → optional bundled `Secrets.plist` → first-launch entry screen, and a rejected token re-prompts. A client-side secret can always be pulled off a device, so the Keychain only protects it at rest; a server-side token is the real fix (see *Limitations*).
 
 ---
 
@@ -192,9 +188,9 @@ No secrets in the repo. The token resolves Keychain → optional bundled `Secret
 
 **Requirements:** Xcode 16+ (iOS 18 SDK) and an iOS 18 simulator (defaults to iPhone 17 Pro).
 
-**TMDB token.** The app authenticates with a TMDB **v4 read access token** (a Bearer token), supplied either way:
+**TMDB token.** The app authenticates with a TMDB v4 read access token (a Bearer token). You can provide it two ways:
 
-1. **Zero config:** build and run. With no token found, the app prompts once and stores it in the Keychain.
+1. **Zero config:** build and run. If no token is found, the app prompts for one and stores it in the Keychain.
 2. **Bundled secret (for repeat runs):**
    ```sh
    cp Secrets.example.plist NeugelbCodingChallenge-iOS-FarazAhmed/Secrets.plist
@@ -207,10 +203,10 @@ Get a token at <https://www.themoviedb.org/settings/api>.
 
 ## Limitations & what I'd do next
 
-A deliberate, honest list — these are choices scoped for a challenge, not oversights:
+These are scoped out for the challenge, not missed:
 
-- **Token belongs on a server.** The production answer is a thin backend proxy that holds the TMDB credential and the app talks to *that*. The Keychain flow here is the best a client-only app can do.
-- **Image caching is `URLSession`-default.** Fine at this scale; a real catalog wants a bounded disk cache with eviction (or Nuke/Kingfisher) and prefetching ahead of the scroll.
-- **Offline cache is the last list only.** It proves the decorator seam. A fuller version would cache detail pages and search, with a TTL and a freshness indicator.
-- **UI tests are the next layer.** Accessibility identifiers are already in place (`movie_list.*`, `search.*`, `movie_detail.*`, `token_entry.*`) so XCUITest flows can be added against a launch-arg network stub without touching production code.
-- **Observability.** No analytics/crash reporting wired up; the composition root is the natural injection point when it's needed.
+- **The token should live on a server.** In production a small backend would hold the TMDB credential and the app would call that instead. The Keychain flow is the best a client-only app can do.
+- **Image caching uses `URLSession` defaults.** Fine at this size, but a larger catalog would want a bounded disk cache with eviction (or a library like Nuke or Kingfisher) and prefetching while scrolling.
+- **The offline cache keeps only the last list.** Enough to show the wrapper working; a fuller version would also cache detail and search, with a TTL.
+- **No UI tests yet.** The accessibility identifiers (`movie_list.*`, `search.*`, `movie_detail.*`, `token_entry.*`) are already in place, so XCUITest flows can be added against a launch-argument network stub.
+- **No analytics or crash reporting.** The composition root is where that would go.
