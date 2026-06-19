@@ -21,7 +21,7 @@ The brief is small enough to solve in a single view. I deliberately didn't. This
 
 ## Architecture
 
-MVVM with a lightweight router. The reusable foundation lives in a Swift package (`NeugelbKit`); feature screens and view models live in the app target and build on top of it. The dependency arrows only ever point *inward* — toward the domain.
+Layered MVVM. The reusable foundation — domain, data, and design-system — lives in a Swift package (`NeugelbKit`); SwiftUI views and `@Observable` view models live in the app target and build on top of it. The dependency arrows only ever point *inward* — toward the domain.
 
 Blue nodes are `@MainActor` (UI state); amber nodes are `actor`-isolated infrastructure. Dependency arrows point inward, toward the domain.
 
