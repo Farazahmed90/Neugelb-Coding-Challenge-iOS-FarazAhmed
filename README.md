@@ -6,7 +6,7 @@ The brief is small enough to solve in a single view. I deliberately didn't. This
 
 - **Platform:** iOS 18+ · SwiftUI · Swift 6 (strict concurrency)
 - **Localization:** English + German · Dynamic Type · light/dark
-- **Tests:** ~70 across the app target and the foundation package
+- **Tests:** deterministic unit tests across the app and the foundation package
 
 ---
 
@@ -128,9 +128,11 @@ The result is a unidirectional flow — intent goes down through async calls, st
 
 ## Testing strategy
 
-Tests target the **seams**, not the screens. Because every collaborator is a protocol, the suite runs entirely in-memory with no network and no flakiness.
+Tests target the **seams**, not the screens — the risk lives in the logic (pagination, retry, token fallback, decoding), not in declarative SwiftUI layout. Because every collaborator is a protocol, the suite runs entirely in-memory: the HTTP transport is stubbed, so the networking layer is fully exercised without opening a real socket — deterministic and flake-free.
 
-- **Domain/data tests** (`NeugelbKit` package): endpoint construction, DTO decoding against JSON fixtures, the retry/empty-response paths, token resolution (Keychain → bundled seed → prompt), and the offline-fallback decorator — verified with a stubbed `HTTPClient` and an in-memory `SecretStore`.
+End-to-end UI flows aren't unit-tested by design — XCUITest is the planned next layer, and the accessibility identifiers it needs are already in place (see *Limitations*).
+
+- **Domain/data tests** (`NeugelbKit` package): the **TMDB networking layer** — endpoint construction, auth-header injection, HTTP error mapping, retry, and empty/bodyless responses — plus DTO decoding against JSON fixtures, token resolution (Keychain → bundled seed → prompt), and the offline-fallback decorator. Verified with a stubbed `HTTPClient` and an in-memory `SecretStore`.
 - **Feature tests** (app target): the generic `Paginator` (load-more, retry, empty/terminal states), search debounce + suggestion behavior, detail loading, and router navigation — driven by a `MovieRepositoryMock`.
 - **Shared doubles, defined once.** `TestSupport` is a library product holding the mocks/factories used by *both* surfaces, so a fake is never duplicated. Data-layer-only fakes (HTTP, secrets, fixtures) stay local to the package tests, where they belong.
 
