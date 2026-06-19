@@ -18,8 +18,11 @@ actor HTTPClientMock: HTTPClient {
 
     func data(for request: URLRequest) async throws -> (Data, HTTPURLResponse) {
         requests.append(request)
-        precondition(!stubs.isEmpty, "HTTPClientMock ran out of stubs")
-        switch stubs.removeFirst() {
+        precondition(!stubs.isEmpty, "HTTPClientMock needs at least one stub")
+        // Repeat the last stub once consumed, so a single stub survives the
+        // client's automatic retries.
+        let stub = stubs.count > 1 ? stubs.removeFirst() : stubs[0]
+        switch stub {
         case .success(let data, let statusCode):
             let response = HTTPURLResponse(
                 url: request.url!,
