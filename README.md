@@ -87,10 +87,13 @@ The view model talks only to the `MovieRepository` protocol. What's actually beh
 sequenceDiagram
     participant VM as MovieListViewModel
     participant P as Paginator
-    participant Off as OfflineFallback<br/>(MovieRepository)
+    participant Off as OfflineFallback
     participant API as TMDBAPIClient
-    participant Tok as TokenProvider<br/>(actor)
+    participant Tok as TokenProvider
     participant T as TMDB API
+
+    Note over Off: implements MovieRepository (decorator)
+    Note over Tok: actor-isolated, Keychain-backed
 
     VM->>P: loadFirst() / loadMore()
     P->>Off: latestMovies(page:)
@@ -100,12 +103,12 @@ sequenceDiagram
     API->>T: authorized request (retries on transient failure)
     alt success
         T-->>API: JSON
-        API-->>Off: decoded Page<Movie>
+        API-->>Off: decoded Page&lt;Movie&gt;
         Off->>Off: cache page to disk
     else network failure
         Off->>Off: load last cached page
     end
-    Off-->>P: Page<Movie>
+    Off-->>P: Page&lt;Movie&gt;
     P-->>VM: items appended
 ```
 
