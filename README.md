@@ -103,12 +103,12 @@ sequenceDiagram
     API->>T: authorized request (retries on transient failure)
     alt success
         T-->>API: JSON
-        API-->>Repo: decoded Page&lt;Movie&gt;
+        API-->>Repo: decoded Page of Movie
         Repo->>Repo: cache page to disk
     else network failure
         Repo->>Repo: load last cached page
     end
-    Repo-->>P: Page&lt;Movie&gt;
+    Repo-->>P: Page of Movie
     P-->>VM: items appended
 ```
 
