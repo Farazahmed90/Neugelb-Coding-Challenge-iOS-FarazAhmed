@@ -1,6 +1,6 @@
 # Neugelb iOS Challenge task
 
-A SwiftUI client for [The Movie Database (TMDB)](https://www.themoviedb.org). It shows the latest movies with infinite scroll, a detail screen, and search with live suggestions. Built for the Neugelb iOS challenge.
+A SwiftUI App for [The Movie Database (TMDB)](https://www.themoviedb.org). It shows the latest movies with infinite scroll, a detail screen, and search with live suggestions. Built for the Neugelb iOS challenge by Faraz Ahmed.
 
 The app is small, but I've put it together the way I'd build something a team has to maintain. The domain and data layers sit behind protocols, the UI depends only on those protocols, and the concrete types are wired up in one place. The sections below cover how it fits together and the reasoning behind the main choices.
 
