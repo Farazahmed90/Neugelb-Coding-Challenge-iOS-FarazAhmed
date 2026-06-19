@@ -126,6 +126,16 @@ Calls go down as async functions, and state comes back up through `@Observable`.
 
 ---
 
+## Accessibility
+
+- **VoiceOver.** Each movie card and carousel slide is a single accessibility element with a clear label (the title) and value (year and rating), so VoiceOver reads one item instead of its separate pieces. Buttons carry the button trait, and the decorative loading skeletons are hidden from assistive tech.
+- **Dynamic Type.** The UI uses semantic fonts, so text scales with the system setting. Cards reserve two lines for the title so the grid stays even as text grows, and a preview checks the layout at the `accessibility1` size in dark mode.
+- **Reduce Motion.** The featured carousel stops auto-advancing, and the grid's blur-replace transition falls back to a plain fade.
+- **Localization.** English and German, with the system choosing based on the device language.
+- **Test hooks.** Stable accessibility identifiers (`movie_list.*`, `search.*`, `movie_detail.*`, `token_entry.*`) are in place for VoiceOver navigation and future XCUITest flows.
+
+---
+
 ## Testing strategy
 
 The tests focus on logic rather than views. Pagination, retry, token fallback, and decoding are where things break, not in declarative SwiftUI. Because every dependency is a protocol, the tests run in memory with a stubbed HTTP transport, so the networking layer is covered without making real requests.
