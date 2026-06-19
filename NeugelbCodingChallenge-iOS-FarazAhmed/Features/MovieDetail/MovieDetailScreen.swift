@@ -6,6 +6,8 @@ struct MovieDetailScreen: View {
     @Environment(\.openURL) private var openURL
     private let viewModel: MovieDetailViewModel
     @State private var overviewExpanded = false
+    @State private var overviewCollapsedHeight: CGFloat = 0
+    @State private var overviewFullHeight: CGFloat = 0
 
     init(viewModel: MovieDetailViewModel) {
         self.viewModel = viewModel
@@ -180,14 +182,17 @@ struct MovieDetailScreen: View {
             VStack(alignment: .leading, spacing: 8) {
                 SectionHeader(Text(L10n.MovieDetail.overview))
                 // Real words so the placeholder wraps like normal text.
-                Text(overview.isEmpty ? Self.overviewPlaceholder : overview)
+                let overviewText = overview.isEmpty ? Self.overviewPlaceholder : overview
+                Text(overviewText)
                     .font(.body)
                     .foregroundStyle(.secondary)
-                    .lineLimit(overviewExpanded ? nil : 6)
+                    .lineLimit(overviewExpanded ? nil : Self.overviewCollapsedLines)
                     .animation(.easeInOut(duration: 0.2), value: overviewExpanded)
+                    .background { overviewTruncationProbe(for: overviewText) }
                     .accessibilityIdentifier("movie_detail.overview")
 
-                if details != nil, overview.count > 280 {
+                // Only when the text is really clipped — a character count misses narrow screens like the SE.
+                if details != nil, overviewIsTruncated {
                     Button {
                         withAnimation { overviewExpanded.toggle() }
                     } label: {
@@ -203,6 +208,27 @@ struct MovieDetailScreen: View {
                 .font(.body)
                 .foregroundStyle(.secondary)
         }
+    }
+
+    private static let overviewCollapsedLines = 6
+
+    private var overviewIsTruncated: Bool {
+        overviewFullHeight > overviewCollapsedHeight + 1
+    }
+
+    // Hidden twins that measure collapsed vs. full height, so the toggle tracks real clipping.
+    private func overviewTruncationProbe(for text: String) -> some View {
+        ZStack {
+            Text(text)
+                .font(.body)
+                .lineLimit(Self.overviewCollapsedLines)
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { overviewCollapsedHeight = $0 }
+            Text(text)
+                .font(.body)
+                .fixedSize(horizontal: false, vertical: true)
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { overviewFullHeight = $0 }
+        }
+        .hidden()
     }
 
     // MARK: - Cast
